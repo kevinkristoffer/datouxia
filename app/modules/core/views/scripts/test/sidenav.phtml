@@ -1,0 +1,6 @@
+<h3><?php echo $this->sidebarInfo;?></h3>
+<ul>
+<?php foreach ($this->forums as $forum):?>
+<li><a href="#"><?php echo $forum->forumname; ?></a></li>
+<?php endforeach;?>
+</ul>

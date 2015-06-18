@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Administration</title>
+<script type="text/javascript">
+var baseUrl='<?php echo $this->baseUrl(); ?>';
+</script>
+</head>
+<body>
+<table>
+<tr><td></td><td><span id="error_msg" style="color:red;"></span></td></tr>
+<tr><td>Login ID:</td><td><input type="text" id="f_id"/></td></tr>
+<tr><td>Password:</td><td><input type="password" id="f_pwd"/></td></tr>
+<tr><td><button id="b_submit">Login</button></td><td></td></tr>
+<tr><td><button id="b_test">Test Authentication</button></td><td></td></tr>
+</table>
+
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.10.1.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('#b_submit').bind('click',function(){
+		var loginID=$('#f_id').val();
+		var loginPwd=$('#f_pwd').val();
+		if($.trim(loginID)=='' || $.trim(loginPwd)==''){
+			$('#error_msg').html('ID or password is blank');
+			return;
+		}
+		if(!/^(\d){8}$/.test(loginID)){
+			$('#error_msg').html('Invalid Identity Number');
+			return;
+		}
+		$.post(baseUrl+'/backend/login',{f_id:loginID,f_pwd:loginPwd},function(data){
+			alert(data);
+		});
+	});
+	$('#b_test').bind('click',function(){
+		$.post(baseUrl+'/core/auth/test-auth',{},function(data){
+			alert(data);
+		});
+	});
+});
+</script>
+</body>
+</html>
