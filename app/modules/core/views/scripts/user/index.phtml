@@ -8,17 +8,21 @@
 </head>
 <body>
 <div class="container">
-    <div class="row">
-        <div class="control-group span6">
-            <label class="control-label"></label>
-            <div class="controls"><input/></div>
+    <form class="form-horizontal">
+        <div class="row" style="margin-top: 20px;">
+            <div class="control-group span7">
+                <label class="control-label"><?php echo $this->translator('user_id_search_form_label'); ?></label>
+                <div class="controls"><input class="input-normal control-text"/></div>
+            </div>
+            <div class="control-group span7">
+                <label class="control-label"><?php echo $this->translator('user_name_search_form_label'); ?></label>
+                <div class="controls"><input class="input-normal control-text"/></div>
+            </div>
+            <div class="span6">
+                <button class="button"><?php echo $this->translator('search_button_text'); ?></button>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="span24">
-            <button><?php echo $this->translator('user_search_button_text'); ?></button>
-        </div>
-    </div>
+    </form>
     <hr/>
     <div id="user-grid" style="margin:10px;"></div>
 </div>
@@ -38,16 +42,16 @@
             }
         });
         columns=[{
-            title:'ID',dataIndex:'id',width:100,elCls:'center'
+            title:'<?php echo $this->translator('user_grid_column_header_id'); ?>',dataIndex:'id',width:100,elCls:'center'
         },{
-            title:'Name',dataIndex:'uname',width:150,elCls:'center'
+            title:'<?php echo $this->translator('user_grid_column_header_name'); ?>',dataIndex:'uname',width:150,elCls:'center'
         },{
-            title:'User Group',dataIndex:'usergroup',width:100,elCls:'center'
+            title:'<?php echo $this->translator('user_grid_column_header_usergroup'); ?>',dataIndex:'usergroup',width:100,elCls:'center'
         },{
-            title:'Status',dataIndex:'valid'
+            title:'<?php echo $this->translator('user_grid_column_header_status'); ?>',dataIndex:'valid'
         },{
-            title:'Handlers',elCls:'center',renderer:function(value,obj){
-                return '<span class="grid-command edit-handler">edit</span>';
+            title:'<?php echo $this->translator('user_grid_column_header_handler'); ?>',elCls:'center',renderer:function(value,obj){
+                return '<span class="grid-command edit-handler"><?php echo $this->translator('edit_handler_text'); ?></span>';
             }
         }];
         grid=new Grid.Grid({

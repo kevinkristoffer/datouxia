@@ -29,10 +29,10 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     public function queryUserList($where = null, $limit = 10, $offset = 0)
     {
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), null)->join(array('b' =>
-            $this->_prefix . 'core_role'), 'a.rolecode=b.rolecode', null)->columns(array('authid'=>'id',
-            'accountname'=>'uname',
-            'validflag'=>'valid'), 'a')->columns(array('rolecode',
-            'rolename'=>'usergroup'), 'b');
+            $this->_prefix . 'core_role'), 'a.rolecode=b.rolecode', null)->columns(array('authid' => 'id',
+            'accountname' => 'uname',
+            'validflag' => 'valid'), 'a')->columns(array('rolecode',
+            'rolename' => 'usergroup'), 'b');
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
                 $select = $select->where($key, $value);
@@ -43,18 +43,43 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
         return $result;
     }
 
+    /**
+     * @return int
+     */
+    public function countUser()
+    {
+        $select = $this->_db->select()
+            ->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
+        $result = $select->query()->fetch();
+        return $result->total;
+    }
+
+
     public function queryUserDetail()
     {
 
     }
 
-    public function addUser()
+    /**
+     * @param $user
+     * @return int
+     * @throws Zend_Db_Adapter_Exception
+     */
+    public function addUser($user)
     {
-
+        $affectedRows = $this->_db->insert($this->_prefix . 'core_role', $user);
+        return $affectedRows;
     }
 
-    public function updateUser()
+    /**
+     * @param $set
+     * @param $where
+     * @return int
+     * @throws Zend_Db_Adapter_Exception
+     */
+    public function updateUser($set, $where)
     {
-
+        $affectedRows = $this->_db->update($this->_prefix . 'core_role', $set, $where);
+        return $affectedRows;
     }
 }

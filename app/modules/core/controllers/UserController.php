@@ -24,14 +24,14 @@ class Core_UserController extends Zend_Controller_Action
                 !preg_match('/^(\d+)$/', $params['pageIndex']) || !preg_match('/^(\d+)$/', $params['limit'])
             )
                 exit();
-            try{
+            try {
                 $db = Puppy_Core_Db::getConnection();
                 $modelManager = Puppy_Core_Model_Manager::getInstance();
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_User');
                 $users = $modelManager->core_User->queryUserList();
-            }catch (Exception $ex){
-                $users=array();
+            } catch (Exception $ex) {
+                $users = array();
             }
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
             $this->_response->setBody(json_encode($users));
@@ -45,7 +45,9 @@ class Core_UserController extends Zend_Controller_Action
 
     public function addAction()
     {
+        if ($this->_request->isPost()) {
 
+        }
     }
 
     public function generateIdAction()
