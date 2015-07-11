@@ -12,7 +12,7 @@
     <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/role/add" method="post">
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_code_label'); ?></label>
+                <label class="control-label">角色代码</label>
                 <div class="controls">
                     <input type="text" id="a-role-code" name="role-code" class="input-small control-text" data-messages="{regexp:'Invalid Role Code'}" data-rules="{required:true,regexp:/^[A-Z]{2}$/}"/>
                 </div>
@@ -20,7 +20,7 @@
         </div>
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_name_label'); ?></label>
+                <label class="control-label">用户组名称</label>
                 <div class="controls">
                     <input type="text" id="a-role-name" name="role-name" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
                 </div>
@@ -28,18 +28,18 @@
         </div>
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_status_label'); ?></label>
+                <label class="control-label">当前状态</label>
                 <div class="controls">
                     <select id="a-role-status" name="role-status" class="input-normal">
-                        <option value="Y"><?php echo $this->translator('status_option_valid_text'); ?></option>
-                        <option value="N"><?php echo $this->translator('status_option_invalid_text'); ?></option>
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
                     </select>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="control-group span15">
-                <label class="control-label"><?php echo $this->translator('role_desc_label'); ?></label>
+                <label class="control-label">描述</label>
                 <div class="controls control-row4">
                     <textarea id="a-role-desc" name="role-desc" class="input-large" data-rules="{maxlength:100}"></textarea>
                 </div>
@@ -51,7 +51,7 @@
     <form id="edit-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/role/edit" method="post">
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_code_label'); ?></label>
+                <label class="control-label">角色代码</label>
                 <div class="controls">
                     <input type="text" id="e-role-code" class="input-small control-text" disabled="disabled"/>
                 </div>
@@ -59,7 +59,7 @@
         </div>
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_name_label'); ?></label>
+                <label class="control-label">用户组名称</label>
                 <div class="controls">
                     <input type="text" id="e-role-name" name="role-name" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
                 </div>
@@ -67,18 +67,18 @@
         </div>
         <div class="row">
             <div class="control-group span8">
-                <label class="control-label"><?php echo $this->translator('role_status_label'); ?></label>
+                <label class="control-label">当前状态</label>
                 <div class="controls">
                     <select id="e-role-status" name="role-status" class="input-normal">
-                        <option value="Y"><?php echo $this->translator('status_option_valid_text'); ?></option>
-                        <option value="N"><?php echo $this->translator('status_option_invalid_text'); ?></option>
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
                     </select>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="control-group span15">
-                <label class="control-label"><?php echo $this->translator('role_desc_label'); ?></label>
+                <label class="control-label">描述</label>
                 <div class="controls control-row4">
                     <textarea id="e-role-desc" name="role-desc" class="input-large" data-rules="{maxlength:100}"></textarea>
                 </div>
@@ -115,7 +115,7 @@
             }
         }).render();
         addDialog=new Overlay.Dialog({
-            title:'<?php echo $this->translator('role_add_dialog_title'); ?>',
+            title:'新增用户组',
             width:500,
             height:250,
             contentId:'role-creator',
@@ -137,7 +137,7 @@
             }
         }).render();
         editDialog=new Overlay.Dialog({
-            title:'<?php echo $this->translator('role_edit_dialog_title'); ?>',
+            title:'编辑用户组',
             width:500,
             height:250,
             contentId:'role-editor',
@@ -153,14 +153,14 @@
             autoLoad:true
         });
         columns=[{
-            title:'<?php echo $this->translator('role_grid_column_header_code'); ?>',dataIndex:'rolecode',width:100,elCls:'center'
+            title:'角色代码',dataIndex:'rolecode',width:100,elCls:'center'
         },{
-            title:'<?php echo $this->translator('role_grid_column_header_name'); ?>',dataIndex:'rolename',width:150,elCls:'center'
+            title:'用户组名称',dataIndex:'rolename',width:150,elCls:'center'
         },{
-            title:'<?php echo $this->translator('role_grid_column_header_status'); ?>',dataIndex:'currentstatus',width:100,elCls:'center'
+            title:'当前状态',dataIndex:'currentstatus',width:100,elCls:'center'
         },{
-            title:'<?php echo $this->translator('role_grid_column_header_handler'); ?>',elCls:'center',renderer:function(value,obj){
-                return '<span class="grid-command edit-handler"><?php echo $this->translator('edit_handler_text'); ?></span>';
+            title:'操作',elCls:'center',renderer:function(value,obj){
+                return '<span class="grid-command edit-handler">编辑</span>';
             }
         }];
         grid=new Grid.Grid({
@@ -173,7 +173,7 @@
             tbar:{
                 items:[{
                     btnCls:'button button-small',
-                    text:'<?php echo $this->translator('add_button_text'); ?>',
+                    text:'新增',
                     listeners:{
                         click:function(){
                             addDialog.show();

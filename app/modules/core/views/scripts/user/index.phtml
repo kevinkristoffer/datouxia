@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
     <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
-    <title>User Management</title>
+    <title>用户管理</title>
 </head>
 <body>
 <div class="container">
     <form class="form-horizontal">
         <div class="row" style="margin-top: 20px;">
             <div class="control-group span7">
-                <label class="control-label"><?php echo $this->translator('user_id_search_form_label'); ?></label>
+                <label class="control-label">用户编号</label>
                 <div class="controls"><input class="input-normal control-text"/></div>
             </div>
             <div class="control-group span7">
-                <label class="control-label"><?php echo $this->translator('user_name_search_form_label'); ?></label>
+                <label class="control-label">帐号关键字</label>
                 <div class="controls"><input class="input-normal control-text"/></div>
             </div>
             <div class="span6">
-                <button class="button"><?php echo $this->translator('search_button_text'); ?></button>
+                <button id="search-button" class="button-info">搜索</button>
             </div>
         </div>
     </form>
@@ -42,16 +42,16 @@
             }
         });
         columns=[{
-            title:'<?php echo $this->translator('user_grid_column_header_id'); ?>',dataIndex:'id',width:100,elCls:'center'
+            title:'用户编号',dataIndex:'id',width:100,elCls:'center'
         },{
-            title:'<?php echo $this->translator('user_grid_column_header_name'); ?>',dataIndex:'uname',width:150,elCls:'center'
+            title:'账户名',dataIndex:'uname',width:150,elCls:'center'
         },{
-            title:'<?php echo $this->translator('user_grid_column_header_usergroup'); ?>',dataIndex:'usergroup',width:100,elCls:'center'
+            title:'用户组',dataIndex:'usergroup',width:100,elCls:'center'
         },{
-            title:'<?php echo $this->translator('user_grid_column_header_status'); ?>',dataIndex:'valid'
+            title:'当前状态',dataIndex:'valid'
         },{
-            title:'<?php echo $this->translator('user_grid_column_header_handler'); ?>',elCls:'center',renderer:function(value,obj){
-                return '<span class="grid-command edit-handler"><?php echo $this->translator('edit_handler_text'); ?></span>';
+            title:'操作',elCls:'center',renderer:function(value,obj){
+                return '<span class="grid-command edit-handler">编辑</span>';
             }
         }];
         grid=new Grid.Grid({
@@ -64,7 +64,7 @@
             tbar:{
                 items:[{
                     btnCls:'button button-small',
-                    text:'New',
+                    text:'新增',
                     listeners:{
                         click:function(){
                             //
@@ -73,6 +73,9 @@
                 }]
             },
             autoRender:true
+        });
+        $('#search-button').bind('click',function(){
+            alert('OK');
         });
     };
 </script>
