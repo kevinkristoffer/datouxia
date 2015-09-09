@@ -5,11 +5,16 @@ class Puppy_Model_Core_Role extends Puppy_Core_Model
     /**
      * @return array
      */
-    public function queryAllRoles()
+    public function queryRoleList($where = null, $fields = array('rolecode',
+        'rolename',
+        'validflag'))
     {
-        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_role'), array('rolecode',
-            'rolename',
-            'currentstatus' => 'validflag'));
+        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_role'), $fields);
+        if ($where != null && is_array($where)) {
+            foreach ($where as $key => $value) {
+                $select = $select->where($key, $value);
+            }
+        }
         $result = $select->query()->fetchAll();
         return $result;
     }

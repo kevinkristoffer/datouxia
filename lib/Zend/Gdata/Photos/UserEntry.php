@@ -59,7 +59,7 @@ require_once 'Zend/Gdata/Photos/Extension/MaxPhotosPerAlbum.php';
 /**
  * @see Zend_Gdata_Photos_Extension_User
  */
-require_once 'Zend/Gdata/Photos/Extension/User.php';
+require_once 'Zend/Gdata/Photos/Extension/User_Test_File.php';
 
 /**
  * @see Zend_Gdata_App_Extension_Category

@@ -19,14 +19,23 @@ class Core_RoleController extends Zend_Controller_Action
             $this->_helper->getHelper('viewRenderer')->setNoRender();
             $this->_helper->getHelper('layout')->disableLayout();
 
-            try{
+            try {
                 $db = Puppy_Core_Db::getConnection();
                 $modelManager = Puppy_Core_Model_Manager::getInstance();
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_Role');
-                $roles = $modelManager->core_Role->queryAllRoles();
-            }catch (Exception $ex){
-                $roles=array();
+                $params = $this->_request->getParams();
+                if (array_key_exists('valid', $params) && trim($params['valid']) == 'true') {
+                    $where = array('validflag=?' => 'Y');
+                    $fields = array('value'=>'rolecode',
+                        'text'=>'rolename');
+                    $roles = $modelManager->core_Role->queryRoleList($where,$fields);
+                }
+                else {
+                    $roles = $modelManager->core_Role->queryRoleList();
+                }
+            } catch (Exception $ex) {
+                $roles = array();
             }
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
             $this->_response->setBody(json_encode($roles));

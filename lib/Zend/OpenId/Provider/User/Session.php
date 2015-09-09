@@ -24,7 +24,7 @@
 /**
  * @see Zend_OpenId_Provider_User
  */
-require_once "Zend/OpenId/Provider/User.php";
+require_once "Zend/OpenId/Provider/User_Test_File.php";
 
 /**
  * @see Zend_Session_Namespace

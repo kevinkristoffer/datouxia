@@ -29,10 +29,10 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     public function queryUserList($where = null, $limit = 10, $offset = 0)
     {
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), null)->join(array('b' =>
-            $this->_prefix . 'core_role'), 'a.rolecode=b.rolecode', null)->columns(array('authid' => 'id',
-            'accountname' => 'uname',
-            'validflag' => 'valid'), 'a')->columns(array('rolecode',
-            'rolename' => 'usergroup'), 'b');
+            $this->_prefix . 'core_role'), 'a.rolecode=b.rolecode', null)->columns(array('authid',
+            'accountname',
+            'validflag'), 'a')->columns(array('rolecode',
+            'rolename'), 'b');
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
                 $select = $select->where($key, $value);
@@ -48,8 +48,7 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
      */
     public function countUser()
     {
-        $select = $this->_db->select()
-            ->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
+        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
         $result = $select->query()->fetch();
         return $result->total;
     }

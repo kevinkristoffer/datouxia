@@ -29,12 +29,18 @@ class Core_UserController extends Zend_Controller_Action
                 $modelManager = Puppy_Core_Model_Manager::getInstance();
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_User');
-                $users = $modelManager->core_User->queryUserList();
+                $users = $modelManager->core_User->queryUserList(null, $params['limit'], $params['pageIndex'] *
+                                                                                         $params['limit']);
+                $userCount = $modelManager->core_User->countUser();
             } catch (Exception $ex) {
+                echo $ex->getMessage();
                 $users = array();
+                $userCount = 0;
             }
+            $responseBody = array('rows' => $users,
+                'results' => $userCount);
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
-            $this->_response->setBody(json_encode($users));
+            $this->_response->setBody(json_encode($responseBody));
         }
     }
 

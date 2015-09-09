@@ -8,23 +8,48 @@
 </head>
 <body>
 <div class="container">
-    <form class="form-horizontal">
-        <div class="row" style="margin-top: 20px;">
-            <div class="control-group span7">
+    <div id="user-grid" style="margin:10px;"></div>
+</div>
+<div id="user-search" class="hide">
+    <form id="search-form" class="form-horizontal">
+        <div class="row">
+            <div class="control-group span8">
                 <label class="control-label">用户编号</label>
-                <div class="controls"><input class="input-normal control-text"/></div>
+                <div class="controls">
+                    <input type="text" id="s-authid" name="role-code" class="input-small control-text" data-messages="{regexp:'无效编号'}" data-rules="{regexp:/^$|^[0-9]{8}$/}"/>
+                </div>
             </div>
-            <div class="control-group span7">
+        </div>
+        <div class="row">
+            <div class="control-group span8">
                 <label class="control-label">帐号关键字</label>
-                <div class="controls"><input class="input-normal control-text"/></div>
+                <div class="controls">
+                    <input type="text" id="s-accountname" name="role-name" class="input-normal control-text" data-rules="{maxlength:20}"/>
+                </div>
             </div>
-            <div class="span6">
-                <button id="search-button" class="button-info">搜索</button>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <div id="roles">
+                        <input type="hidden" id="roles-hide" value="b" name="s-rolecode">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select id="s-validflag" name="user-status" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
             </div>
         </div>
     </form>
-    <hr/>
-    <div id="user-grid" style="margin:10px;"></div>
 </div>
 <!-- JS -->
 <script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
@@ -33,51 +58,113 @@
     var baseUrl="<?php echo $this->baseUrl(); ?>";
 </script>
 <script type="text/javascript">
-    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form'],function(Data,Grid,Overlay,Form){
-        var addForm,editForm,addDialog,editDialog,store,columns,grid;
-        store=new Data.Store({
+    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
+        var searchForm,addForm,editForm,searchDialog,addDialog,editDialog,userStore,roleStore,columns,grid,roleSelect;
+        roleStore=new Data.Store({
+            url:baseUrl+'/core/role/list',
+            proxy:{
+                method:'post'
+            },
+            params:{
+                valid:true
+            },
+            autoLoad:true
+        });
+        roleSelect=new Select.Combox({
+            render:'#roles',
+            valueField:'#roles-hide',
+            store:roleStore,
+            autoRender:true
+        });
+        userStore=new Data.Store({
             url:baseUrl+'/core/user/list',
             proxy:{
-                method:'POST'
-            }
+                method:'post'
+            },
+            autoLoad:true,
+            pageSize:5
         });
         columns=[{
-            title:'用户编号',dataIndex:'id',width:100,elCls:'center'
+            title:'用户编号',dataIndex:'authid',width:100,elCls:'center'
         },{
-            title:'账户名',dataIndex:'uname',width:150,elCls:'center'
+            title:'账户名',dataIndex:'accountname',width:100,elCls:'center'
         },{
-            title:'用户组',dataIndex:'usergroup',width:100,elCls:'center'
+            title:'用户组',dataIndex:'rolename',width:120,elCls:'center'
         },{
-            title:'当前状态',dataIndex:'valid'
-        },{
-            title:'操作',elCls:'center',renderer:function(value,obj){
-                return '<span class="grid-command edit-handler">编辑</span>';
+            title:'当前状态',dataIndex:'valid',width:80,elCls:'center',renderer:function(value,obj){
+                return obj.validflag=='Y' ? '有效' : '无效';
             }
         }];
         grid=new Grid.Grid({
             render:'#user-grid',
-            //width:510,
+            width:480,
             columns:columns,
             loadMask:true,
-            store:store,
+            store:userStore,
             plugins:[Grid.Plugins.RowNumber],
             tbar:{
                 items:[{
                     btnCls:'button button-small',
-                    text:'新增',
+                    text:'<i class="icon-search"></i>搜索',
                     listeners:{
                         click:function(){
-                            //
+                            searchDialog.show();
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-plus-sign"></i>新增',
+                    listeners:{
+                        click:function(){
+                            alert('A');
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-edit"></i>编辑',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                //console.log(selection.authid);
+                            }else{
+                                BUI.Message.Alert('请选择用户','warning');
+                            }
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-user"></i>设定权限',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                //console.log(selection.authid);
+                            }else{
+                                BUI.Message.Alert('请选择用户','warning');
+                            }
                         }
                     }
                 }]
             },
+            bbar:{
+                pagingBar:true
+            },
             autoRender:true
         });
-        $('#search-button').bind('click',function(){
-            alert('OK');
+        searchForm=new Form.HForm({
+            srcNode:'#search-form'
+        }).render();
+        searchDialog=new Overlay.Dialog({
+            title:'搜索用户',
+            width:350,
+            height:205,
+            contentId:'user-search',
+            success:function(){
+
+            }
         });
-    };
+    });
 </script>
 </body>
 </html>

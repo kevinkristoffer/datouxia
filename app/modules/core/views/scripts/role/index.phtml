@@ -157,7 +157,9 @@
         },{
             title:'用户组名称',dataIndex:'rolename',width:150,elCls:'center'
         },{
-            title:'当前状态',dataIndex:'currentstatus',width:100,elCls:'center'
+            title:'当前状态',dataIndex:'validflag',width:100,elCls:'center',renderer:function(value,obj){
+                return obj.validflag=='Y' ? '有效' : '无效';
+            }
         },{
             title:'操作',elCls:'center',renderer:function(value,obj){
                 return '<span class="grid-command edit-handler">编辑</span>';
@@ -173,7 +175,7 @@
             tbar:{
                 items:[{
                     btnCls:'button button-small',
-                    text:'新增',
+                    text:'<i class="icon-plus-sign"></i>新增',
                     listeners:{
                         click:function(){
                             addDialog.show();
