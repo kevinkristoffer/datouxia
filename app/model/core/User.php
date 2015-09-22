@@ -46,9 +46,14 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     /**
      * @return int
      */
-    public function countUser()
+    public function countUser($where = null)
     {
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
+        if ($where != null && is_array($where)) {
+            foreach ($where as $key => $value) {
+                $select = $select->where($key, $value);
+            }
+        }
         $result = $select->query()->fetch();
         return $result->total;
     }

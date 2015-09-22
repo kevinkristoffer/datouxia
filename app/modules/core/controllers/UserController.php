@@ -24,14 +24,19 @@ class Core_UserController extends Zend_Controller_Action
                 !preg_match('/^(\d+)$/', $params['pageIndex']) || !preg_match('/^(\d+)$/', $params['limit'])
             )
                 exit();
+            //搜索参数
+            $where=array();
+            if(array_key_exists('authid',$params) && preg_match('/^[0-9]{8}$/',$params['authid']))
+                $where['a.authid=?']=$params['authid'];
             try {
                 $db = Puppy_Core_Db::getConnection();
                 $modelManager = Puppy_Core_Model_Manager::getInstance();
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_User');
-                $users = $modelManager->core_User->queryUserList(null, $params['limit'], $params['pageIndex'] *
+                $users = $modelManager->core_User->queryUserList($where, $params['limit'], $params['pageIndex'] *
                                                                                          $params['limit']);
-                $userCount = $modelManager->core_User->countUser();
+                $userCount = $modelManager->core_User->countUser($where);
+                sleep(3);
             } catch (Exception $ex) {
                 echo $ex->getMessage();
                 $users = array();

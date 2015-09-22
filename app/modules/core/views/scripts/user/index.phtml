@@ -16,7 +16,7 @@
             <div class="control-group span8">
                 <label class="control-label">用户编号</label>
                 <div class="controls">
-                    <input type="text" id="s-authid" name="role-code" class="input-small control-text" data-messages="{regexp:'无效编号'}" data-rules="{regexp:/^$|^[0-9]{8}$/}"/>
+                    <input type="text" name="authid" class="input-small control-text" data-messages="{regexp:'无效编号'}" data-rules="{regexp:/^$|^[0-9]{8}$/}"/>
                 </div>
             </div>
         </div>
@@ -24,7 +24,7 @@
             <div class="control-group span8">
                 <label class="control-label">帐号关键字</label>
                 <div class="controls">
-                    <input type="text" id="s-accountname" name="role-name" class="input-normal control-text" data-rules="{maxlength:20}"/>
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{maxlength:20}"/>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
                 <label class="control-label">所在用户组</label>
                 <div class="controls">
                     <div id="roles">
-                        <input type="hidden" id="roles-hide" value="b" name="s-rolecode">
+                        <input type="hidden" id="roles-hide" value="" name="rolecode">
                     </div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
             <div class="control-group span8">
                 <label class="control-label">当前状态</label>
                 <div class="controls">
-                    <select id="s-validflag" name="user-status" class="input-normal">
+                    <select name="validflag" class="input-normal">
                         <option value="Y">有效</option>
                         <option value="N">无效</option>
                     </select>
@@ -158,11 +158,37 @@
         searchDialog=new Overlay.Dialog({
             title:'搜索用户',
             width:350,
-            height:205,
+            height:235,
             contentId:'user-search',
-            success:function(){
-
-            }
+            buttons:[{
+                text:'搜索',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(searchForm.isValid()){
+                        var authid=searchForm.getField('authid').get('value');
+                        var accountname=searchForm.getField('accountname').get('value');
+                        var rolecode=roleSelect.getSelectedValue();
+                        var validflag=searchForm.getField('validflag').get('value');
+                        userStore=new Data.Store({
+                            url:baseUrl+'/core/user/list',
+                            proxy:{
+                                method:'post'
+                            },
+                            params:{
+                                'authid':authid,
+                                'accountname':accountname,
+                                'rolecode':rolecode,
+                                'validflag':validflag
+                            },
+                            pageSize:5,
+                        });
+                        userStore.load();
+//                        userStore.on('load',function(){
+//                            searchDialog.close();
+//                        });
+                    }
+                }
+            }]
         });
     });
 </script>
