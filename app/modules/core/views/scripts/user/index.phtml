@@ -32,15 +32,70 @@
             <div class="control-group span8">
                 <label class="control-label">所在用户组</label>
                 <div class="controls">
-                    <div id="roles">
-                        <input type="hidden" id="roles-hide" value="" name="rolecode">
-                    </div>
+                    <select name="rolecode">
+                        <option value="">请选择</option>
+                        <?php foreach($this->roles as $item):?>
+                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="control-group span8">
                 <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="">请选择</option>
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="user-add" class="hide">
+    <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/add" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">帐号名称</label>
+                <div class="controls">
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span16">
+                <label class="control-label">输入密码</label>
+                <div class="controls">
+                    <input type="password" id="p11" name="password1" class="input-normal control-text" data-messages="{regexp:'密码8到20位且含数字、字母、特殊字符'}" data-rules="{regexp:/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span16">
+                <label class="control-label">确认密码</label>
+                <div class="controls">
+                    <input type="password" name="password2" class="input-normal control-text" data-rules="{required:true,equalTo:'#p11'}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <select name="rolecode">
+                        <?php foreach($this->roles as $item):?>
+                        <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">设置状态</label>
                 <div class="controls">
                     <select name="validflag" class="input-normal">
                         <option value="Y">有效</option>
@@ -59,35 +114,19 @@
 </script>
 <script type="text/javascript">
     BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
-        var searchForm,addForm,editForm,searchDialog,addDialog,editDialog,userStore,roleStore,columns,grid,roleSelect;
-        roleStore=new Data.Store({
-            url:baseUrl+'/core/role/list',
-            proxy:{
-                method:'post'
-            },
-            params:{
-                valid:true
-            },
-            autoLoad:true
-        });
-        roleSelect=new Select.Combox({
-            render:'#roles',
-            valueField:'#roles-hide',
-            store:roleStore,
-            autoRender:true
-        });
+        var searchForm,addForm,editForm,searchDialog,addDialog,editDialog,userStore,columns,grid;
         userStore=new Data.Store({
             url:baseUrl+'/core/user/list',
             proxy:{
                 method:'post'
             },
             autoLoad:true,
-            pageSize:5
+            pageSize:6
         });
         columns=[{
             title:'用户编号',dataIndex:'authid',width:100,elCls:'center'
         },{
-            title:'账户名',dataIndex:'accountname',width:100,elCls:'center'
+            title:'帐号名称',dataIndex:'accountname',width:100,elCls:'center'
         },{
             title:'用户组',dataIndex:'rolename',width:120,elCls:'center'
         },{
@@ -116,7 +155,7 @@
                     text:'<i class="icon-plus-sign"></i>新增',
                     listeners:{
                         click:function(){
-                            alert('A');
+                            addDialog.show();
                         }
                     }
                 },{
@@ -152,9 +191,11 @@
             },
             autoRender:true
         });
+        //搜索表单
         searchForm=new Form.HForm({
             srcNode:'#search-form'
         }).render();
+        var searchFlag=true;    //防止多次提交查询
         searchDialog=new Overlay.Dialog({
             title:'搜索用户',
             width:350,
@@ -164,32 +205,81 @@
                 text:'搜索',
                 elCls : 'button button-primary',
                 handler : function(){
-                    if(searchForm.isValid()){
+                    if(searchForm.isValid() && searchFlag){
+                        searchFlag=false;
                         var authid=searchForm.getField('authid').get('value');
                         var accountname=searchForm.getField('accountname').get('value');
-                        var rolecode=roleSelect.getSelectedValue();
+                        var rolecode=searchForm.getField('rolecode').get('value');
                         var validflag=searchForm.getField('validflag').get('value');
-                        userStore=new Data.Store({
-                            url:baseUrl+'/core/user/list',
-                            proxy:{
-                                method:'post'
-                            },
-                            params:{
-                                'authid':authid,
-                                'accountname':accountname,
-                                'rolecode':rolecode,
-                                'validflag':validflag
-                            },
-                            pageSize:5,
+                        userStore.load({
+                            'authid':authid,
+                            'accountname':accountname,
+                            'rolecode':rolecode,
+                            'validflag':validflag,
+                            'start':0,
+                            'pageIndex':0
                         });
-                        userStore.load();
-//                        userStore.on('load',function(){
-//                            searchDialog.close();
-//                        });
+                        userStore.on('load',function(){
+                            searchFlag=true;
+                            searchDialog.close();
+                        });
                     }
+                }
+            },{
+                text:'重置',
+                elCls : 'button button-primary',
+                handler:function(){
+                    searchForm.getField('authid').set('value','');
+                    searchForm.getField('accountname').set('value','');
+                    searchForm.getField('rolecode').set('value','');
+                    searchForm.getField('validflag').set('value','');
                 }
             }]
         });
+        //新建表单
+        var addFlag=true;   //防止重复提交表单
+        addForm=new Form.HForm({
+            srcNode:'#add-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    resetAddForm();
+                    addDialog.close();
+                    userStore.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+                addFlag=true;
+            }
+        }).render();
+        addDialog=new Overlay.Dialog({
+            title: '新建用户',
+            width: 450,
+            height: 275,
+            contentId: 'user-add',
+            buttons:[{
+                text:'确认提交',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(addForm.isValid() && addFlag){
+                        addFlag=false;
+                        addForm.submit();
+                    }
+                }
+            },{
+                text:'重置',
+                elCls : 'button button-primary',
+                handler : resetAddForm
+            }]
+        });
+        function resetAddForm(){
+            addForm.getField('authid').set('value','');
+            addForm.getField('accountname').set('value','');
+            addForm.getField('password1').set('value','');
+            addForm.getField('password2').set('value','');
+            addForm.getField('validflag').set('value','Y');
+        };
     });
 </script>
 </body>

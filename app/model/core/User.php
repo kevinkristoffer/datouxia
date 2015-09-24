@@ -65,6 +65,17 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     }
 
     /**
+     * @return string
+     */
+    public function generateAuthId()
+    {
+        $select = $this->_db->select()->from(array('a' => $this->_prefix .
+                                                          'core_user'), array('maxid' => 'max(authid)'));
+        $result = $select->query()->fetch();
+        return $result->maxid;
+    }
+
+    /**
      * @param $user
      * @return int
      * @throws Zend_Db_Adapter_Exception
