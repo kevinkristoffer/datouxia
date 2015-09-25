@@ -72,7 +72,9 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
         $select = $this->_db->select()->from(array('a' => $this->_prefix .
                                                           'core_user'), array('maxid' => 'max(authid)'));
         $result = $select->query()->fetch();
-        return $result->maxid;
+        $maxid = intval($result->maxid) + 1;
+        $maxid = sprintf('%08d', $maxid);
+        return $maxid;
     }
 
     /**
