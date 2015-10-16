@@ -55,6 +55,7 @@
         </div>
     </form>
 </div>
+<!-- add form -->
 <div id="user-add" class="hide">
     <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/add" method="post">
         <div class="row">
@@ -104,6 +105,43 @@
                 </div>
             </div>
         </div>
+    </form>
+</div>
+<!-- edit form -->
+<div id="user-edit" class="hide">
+    <form id="edit-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/edit" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">帐号名称</label>
+                <div class="controls">
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <select name="rolecode">
+                        <?php foreach($this->roles as $item):?>
+                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">设置状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="authid" value=""/>
     </form>
 </div>
 <!-- JS -->
@@ -166,6 +204,15 @@
                             var selection=grid.getSelected();
                             if(selection){
                                 //console.log(selection.authid);
+                                $.post(baseUrl+'/core/user/item',{'id':selection.authid},function(data){
+                                    if(data.success){
+                                        editForm.getField('accountname').set('value',data.data.accountname);
+                                        editForm.getField('rolecode').set('value',data.data.rolecode);
+                                        editForm.getField('validflag').set('value',data.data.validflag);
+                                        editForm.getField('authid').set('value',data.data.authid);
+                                        editDialog.show();
+                                    }
+                                });
                             }else{
                                 BUI.Message.Alert('请选择用户','warning');
                             }
@@ -274,12 +321,43 @@
             }]
         });
         function resetAddForm(){
-            addForm.getField('authid').set('value','');
             addForm.getField('accountname').set('value','');
             addForm.getField('password1').set('value','');
             addForm.getField('password2').set('value','');
             addForm.getField('validflag').set('value','Y');
         };
+        //编辑表单
+        var editFlag=true;   //防止重复提交表单
+        editForm=new Form.HForm({
+            srcNode:'#edit-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    editDialog.close();
+                    userStore.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+                editFlag=true;
+            }
+        }).render();
+        editDialog=new Overlay.Dialog({
+            title: '编辑用户',
+            width: 450,
+            height: 190,
+            contentId: 'user-edit',
+            buttons:[{
+                text:'确认提交',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(editForm.isValid() && editFlag){
+                        editFlag=false;
+                        editForm.submit();
+                    }
+                }
+            }]
+        });
     });
 </script>
 </body>

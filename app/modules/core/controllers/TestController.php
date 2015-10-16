@@ -27,6 +27,12 @@ class Core_TestController extends Zend_Controller_Action {
 		
 		echo 'System upgrade...';
 	}
+
+    public function test3Action(){
+
+    }
+
+
 }
 
 ?>

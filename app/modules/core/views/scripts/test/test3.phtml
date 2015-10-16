@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>百度地图测试</title>
+    <style type="text/css">
+        html{height: 100%;}
+        body{height: 100%; margin: 0px; padding: 0px;}
+        #container{width: 600px; height: 400px;}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=1.5&ak=ue4cMRT7AY8RZXPw7Ye7pXgX"></script>
+</head>
+<body>
+<h3>百度地图测试</h3>
+<div id="container"></div>
+<script type="text/javascript">
+    var map=new BMap.Map("container");
+    var point=new BMap.Point(121.559,29.873);
+    map.centerAndZoom(point,18);
+    var marker=new BMap.Marker(point);
+    map.addOverlay(marker);
+    map.addControl(new BMap.NavigationControl());
+    map.addControl(new BMap.ScaleControl());
+    map.addControl(new BMap.OverviewMapControl());
+    map.addControl(new BMap.MapTypeControl());
+    map.enableScrollWheelZoom(true);
+</script>
+</body>
+</html>

@@ -58,10 +58,19 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
         return $result->total;
     }
 
-
-    public function queryUserDetail()
+    /**
+     * @param $authid
+     * @return mixed
+     * @throws Zend_Db_Select_Exception
+     */
+    public function queryUserDetail($authid)
     {
-
+        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'))->columns(array('authid',
+                'accountname',
+                'rolecode',
+                'validflag'))->where('authid=?', $authid);
+        $result = $select->query()->fetch();
+        return $result;
     }
 
     /**
@@ -84,7 +93,7 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
      */
     public function addUser($user)
     {
-        $affectedRows = $this->_db->insert($this->_prefix . 'core_role', $user);
+        $affectedRows = $this->_db->insert($this->_prefix . 'core_user', $user);
         return $affectedRows;
     }
 
@@ -96,7 +105,7 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
      */
     public function updateUser($set, $where)
     {
-        $affectedRows = $this->_db->update($this->_prefix . 'core_role', $set, $where);
+        $affectedRows = $this->_db->update($this->_prefix . 'core_user', $set, $where);
         return $affectedRows;
     }
 }

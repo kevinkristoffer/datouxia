@@ -15,14 +15,18 @@ class Core_UserController extends Zend_Controller_Action
             $modelManager->registerModel('core_Role');
             $params = $this->_request->getParams();
             $where = array('validflag=?' => 'Y');
-            $fields = array('rolecode','rolename');
-            $roles = $modelManager->core_Role->queryRoleList($where,$fields);
+            $fields = array('rolecode',
+                'rolename');
+            $roles = $modelManager->core_Role->queryRoleList($where, $fields);
         } catch (Exception $ex) {
             $roles = array();
         }
-        $this->view->assign(array('roles'=>$roles));
+        $this->view->assign(array('roles' => $roles));
     }
 
+    /*
+     * 查询搜索用户列表
+     */
     public function listAction()
     {
         if ($this->_request->isPost()) {
@@ -69,9 +73,44 @@ class Core_UserController extends Zend_Controller_Action
         }
     }
 
-    public function detailAction()
+    /*
+     * 查询用户详情
+     */
+    public function itemAction()
     {
+        if ($this->_request->isPost()) {
+            if (!isset ($_SERVER ['HTTP_X_REQUESTED_WITH']) ||
+                strtolower($_SERVER ['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'
+            ) {
+                exit();
+            }
+            $this->_helper->getHelper('viewRenderer')->setNoRender();
+            $this->_helper->getHelper('layout')->disableLayout();
 
+            $params = $this->_request->getParams();
+            if (!array_key_exists('id', $params) || !preg_match('/^[0-9]{8}$/', $params['id']))
+                exit();
+
+            $response = array();
+            try {
+                $db = Puppy_Core_Db::getConnection();
+                $modelManager = Puppy_Core_Model_Manager::getInstance();
+                $modelManager->setDbConnection($db);
+                $modelManager->registerModel('core_User');
+                $user = $modelManager->core_User->queryUserDetail($params['id']);
+                if ($user != null)
+                    $response = array('success' => true,
+                        'data' => $user);
+                else
+                    throw new Exception();
+            } catch (Exception $ex) {
+                $response = array('success' => false,
+                    'data' => null);
+            }
+
+            $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
+            $this->_response->setBody(json_encode($response));
+        }
     }
 
     /*
@@ -79,6 +118,9 @@ class Core_UserController extends Zend_Controller_Action
      */
     public function addAction()
     {
+        $this->_helper->getHelper('viewRenderer')->setNoRender();
+        $this->_helper->getHelper('layout')->disableLayout();
+
         if ($this->_request->isPost()) {
             if (!isset ($_SERVER ['HTTP_X_REQUESTED_WITH']) ||
                 strtolower($_SERVER ['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'
@@ -91,7 +133,7 @@ class Core_UserController extends Zend_Controller_Action
             $response = array();
             $params = $this->_request->getParams();
             if (!array_key_exists('accountname', $params) || !array_key_exists('password1', $params) ||
-                !preg_match('/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/', $params['password1']) ||
+                //!preg_match('/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/', $params['password1']) ||
                 !array_key_exists('rolecode', $params) || !preg_match('/^[A-Z]{2}$/', $params['rolecode']) ||
                 !array_key_exists('validflag', $params) || !preg_match('/^Y|N$/', $params['validflag'])
             )
@@ -107,17 +149,15 @@ class Core_UserController extends Zend_Controller_Action
                     $authid = $modelManager->core_User->generateAuthId();
                     $user = array('authid' => $authid,
                         'accountname' => $params['accountname'],
-                        'credantial' => md5($params['password1']),
+                        'credential' => md5($params['password1']),
                         'rolecode' => $params['rolecode'],
                         'validflag' => $params['validflag']);
-                    /*$affectedRows = $modelManager->core_User->addUser($user);
+                    $affectedRows = $modelManager->core_User->addUser($user);
                     if ($affectedRows > 0)
                         $response = array('success' => true,
-                                        'info' => $this->view->translator('user_add_success')) . ' : ' . $authid;
+                            'info' => $this->view->translator('user_add_success') . ' : ' . $authid);
                     else
-                        throw new Exception();*/
-                    var_dump($user);
-                    exit();
+                        throw new Exception();
                     $db->commit();
                 } catch (Exception $ex2) {
                     $db->rollBack();
@@ -131,15 +171,61 @@ class Core_UserController extends Zend_Controller_Action
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
             $this->_response->setBody(json_encode($response));
         }
-    }
-
-    public function generateIdAction()
-    {
 
     }
 
+    /*
+     * 编辑系统用户
+     */
     public function editAction()
     {
+        $this->_helper->getHelper('viewRenderer')->setNoRender();
+        $this->_helper->getHelper('layout')->disableLayout();
 
+        if ($this->_request->isPost()) {
+            if (!isset ($_SERVER ['HTTP_X_REQUESTED_WITH']) ||
+                strtolower($_SERVER ['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'
+            ) {
+                exit();
+            }
+            $this->_helper->getHelper('viewRenderer')->setNoRender();
+            $this->_helper->getHelper('layout')->disableLayout();
+
+            $response = array();
+            $params = $this->_request->getParams();
+            if (!array_key_exists('accountname', $params) || $params['accountname'] == '' ||
+                !array_key_exists('authid', $params) || !preg_match('/^[0-9]{8}$/', $params['authid']) ||
+                !array_key_exists('rolecode', $params) || !preg_match('/^[A-Z]{2}$/', $params['rolecode']) ||
+                !array_key_exists('validflag', $params) || !preg_match('/^Y|N$/', $params['validflag'])
+            )
+                exit();
+
+            try {
+                $db = Puppy_Core_Db::getConnection();
+                $modelManager = Puppy_Core_Model_Manager::getInstance();
+                $modelManager->setDbConnection($db);
+                $modelManager->registerModel('core_User');
+                $db->beginTransaction();
+                try {
+                    $set = array('accountname' => $params['accountname'],
+                        'rolecode' => $params['rolecode'],
+                        'validflag' => $params['validflag']);
+                    $where['authid=?'] = $params['authid'];
+                    $affectedRows = $modelManager->core_User->updateUser($set, $where);
+                    $response = array('success' => true,
+                        'info' => $this->view->translator('user_edit_success'));
+                    $db->commit();
+                } catch (Exception $ex2) {
+                    $db->rollBack();
+                    throw $ex2;
+                }
+            } catch (Exception $ex) {
+                $response = array('success' => false,
+                    'info' => $this->view->translator('user_edit_failure'));
+            }
+
+            $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
+            $this->_response->setBody(json_encode($response));
+        }
     }
 }
