@@ -87,6 +87,14 @@
         <input type="hidden" id="h-role-code" name="role-code"/>
     </form>
 </div>
+<div id="role-privilege" class="hide">
+    <div class="row">
+        <div class="span8">
+            <input type="text" id="p1" name="p1"/>
+            <input type="hidden" id="p2" name="p2"/>
+        </div>
+    </div>
+</div>
 
 <!-- JS -->
 <script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
@@ -96,7 +104,7 @@
 </script>
 <script type="text/javascript">
     BUI.use(['bui/data','bui/grid','bui/overlay','bui/form'],function(Data,Grid,Overlay,Form){
-        var addForm,editForm,addDialog,editDialog,store,columns,grid;
+        var addForm,editForm,addDialog,editDialog,privilegeDialog,store,columns,grid;
         addForm=new Form.HForm({
             srcNode:'#add-form',
             submitType:'ajax',
@@ -145,6 +153,15 @@
                 editForm.submit();
             }
         });
+        privilegeDialog=new Overlay.Dialog({
+            title:'设置用户组权限',
+            width:500,
+            height:300,
+            contentId:'role-privilege',
+            success:function(){
+
+            }
+        });
         store=new Data.Store({
             url:baseUrl+'/core/role/list',
             proxy:{
@@ -160,14 +177,10 @@
             title:'当前状态',dataIndex:'validflag',width:100,elCls:'center',renderer:function(value,obj){
                 return obj.validflag=='Y' ? '有效' : '无效';
             }
-        },{
-            title:'操作',elCls:'center',renderer:function(value,obj){
-                return '<span class="grid-command edit-handler">编辑</span>';
-            }
         }];
         grid=new Grid.Grid({
             render:'#role-grid',
-            width:510,
+            width:400,
             columns:columns,
             loadMask:true,
             store:store,
@@ -181,26 +194,44 @@
                             addDialog.show();
                         }
                     }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-plus-sign"></i>编辑',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                $.post(baseUrl+'/core/role/detail',{code:selection.rolecode},function(data){
+                                 if(data){
+                                        $('#h-role-code').val(data.rolecode);
+                                        $('#e-role-code').val(data.rolecode);
+                                        $('#e-role-name').val(data.rolename);
+                                        $('#e-role-status').val(data.validflag);
+                                        $('#e-role-desc').val(data.description);
+                                        editDialog.show();
+                                    }
+                                 },'json');
+                            }else{
+                                BUI.Message.Alert('请选择用户组','warning');
+                            }
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-user"></i>设定权限',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                privilegeDialog.show();
+                            }else{
+                                BUI.Message.Alert('请选择用户组','warning');
+                            }
+                        }
+                    }
                 }]
             },
             autoRender:true
-        });
-        grid.on('cellclick',function(ev){
-            var record=ev.record;
-            var field=ev.field;
-            var target=$(ev.domTarget);
-            if(target.hasClass('edit-handler')){
-                $.post(baseUrl+'/core/role/detail',{code:record.rolecode},function(data){
-                    if(data){
-                        $('#h-role-code').val(data.rolecode);
-                        $('#e-role-code').val(data.rolecode);
-                        $('#e-role-name').val(data.rolename);
-                        $('#e-role-status').val(data.validflag);
-                        $('#e-role-desc').val(data.description);
-                        editDialog.show();
-                    }
-                },'json');
-            }
         });
     });
 </script>

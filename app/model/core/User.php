@@ -44,11 +44,12 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     }
 
     /**
+     * @param null $where
      * @return int
      */
     public function countUser($where = null)
     {
-        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
+        $select = $this->_db->select()->from($this->_prefix . 'core_user', array('total' => 'count(*)'));
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
                 $select = $select->where($key, $value);
@@ -66,9 +67,9 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
     public function queryUserDetail($authid)
     {
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'))->columns(array('authid',
-                'accountname',
-                'rolecode',
-                'validflag'))->where('authid=?', $authid);
+            'accountname',
+            'rolecode',
+            'validflag'))->where('authid=?', $authid);
         $result = $select->query()->fetch();
         return $result;
     }
