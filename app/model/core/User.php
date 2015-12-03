@@ -31,7 +31,7 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), null)->join(array('b' =>
             $this->_prefix . 'core_role'), 'a.rolecode=b.rolecode', null)->columns(array('authid',
             'accountname',
-            'validflag'), 'a')->columns(array('rolecode',
+            'validstatus'), 'a')->columns(array('rolecode',
             'rolename'), 'b');
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
@@ -49,7 +49,7 @@ class Puppy_Model_Core_User extends Puppy_Core_Model
      */
     public function countUser($where = null)
     {
-        $select = $this->_db->select()->from($this->_prefix . 'core_user', array('total' => 'count(*)'));
+        $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'));
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
                 $select = $select->where($key, $value);

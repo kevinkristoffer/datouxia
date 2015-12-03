@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/layout.css">
+    <title>XXX门户管理后台</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div id="J_Layout"></div>
+    </div>
+</div>
+
+<!-- JS -->
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
+<script type="text/javascript">
+    var baseUrl = '<?php echo $this->baseUrl();?>';
+    var forumData =<?php echo $this->forums; ?>;
+</script>
+<script type="text/javascript">
+    var browserWidth = window.screen.width;
+    var browserHeight = window.screen.height;
+    $('#J_Layout').css({marginTop: browserHeight * 0.025});
+
+    BUI.use(['bui/layout', 'bui/tree', 'bui/data', 'bui/tab'], function (Layout, Tree, Data, Tab) {
+        var mynav, mytree;
+        var store = new Data.TreeStore({
+            pidField: 'pid',
+            root: {
+                id: 0,
+                text: 'sidebar'
+            },
+            data: forumData
+        });
+        var control = new BUI.Component.Controller({
+            width: browserWidth * 0.75,
+            height: browserHeight * 0.65,
+            render: '#J_Layout',
+            elCls: 'ext-border-layout',
+            children: [{
+                xclass: 'controller',
+                layout: {
+                    region: 'north',
+                    height: 80
+                },
+                content: '网站头部LOGO'
+            }, {
+                xclass: 'controller',
+                layout: {
+                    region: 'south',
+                    height: 50
+                },
+                content: '网站底部'
+            }, {
+                xclass: 'tree-list',
+                layout: {
+                    title: '导航栏',
+                    region: 'west',
+                    fit: 'both',
+                    collapsable: true,
+                    width: 200
+                },
+                id: 'mytree',
+                store: store,
+                listeners: {
+                    itemclick: function (e) {
+                        if (e.item != null && e.item.leaf) {
+                            var config = {
+                                id: e.item.id,
+                                title: e.item.text,
+                                href: baseUrl + e.item.url
+                            };
+                            mynav.addTab(config);
+                        }
+                    }
+                }
+            }, {
+                xclass: 'nav-tab',
+                layout: {
+                    region: 'center',
+                    fit: 'both'
+                },
+                id: 'mynav',
+                children: [{
+                    id: 0,
+                    title: '主页',
+                    href: baseUrl + '/',
+                    actived: true,
+                    closeable: false
+                }]
+            }],
+            plugins: [Layout.Border]
+        });
+        control.render();
+        mynav = control.getChild('mynav');
+        mytree = control.getChild('mytree');
+    });
+</script>
+</body>
+</html>

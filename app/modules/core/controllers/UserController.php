@@ -7,21 +7,19 @@ class Core_UserController extends Zend_Controller_Action
      */
     public function indexAction()
     {
-        //查询有效的用户组
         try {
             $db = Puppy_Core_Db::getConnection();
             $modelManager = Puppy_Core_Model_Manager::getInstance();
             $modelManager->setDbConnection($db);
             $modelManager->registerModel('core_Role');
-            $params = $this->_request->getParams();
-            $where = array('validflag=?' => 'Y');
-            $fields = array('rolecode',
-                'rolename');
+            $where = array('validstatus=?' => '1');
+            $fields = array('id' => 'rolecode',
+                'text' => 'rolename');
             $roles = $modelManager->core_Role->queryRoleList($where, $fields);
+            $this->view->assign('rolesJSON',json_encode($roles));
         } catch (Exception $ex) {
-            $roles = array();
+            $this->redirect('/core/error');
         }
-        $this->view->assign(array('roles' => $roles));
     }
 
     /*
@@ -39,35 +37,41 @@ class Core_UserController extends Zend_Controller_Action
             $this->_helper->getHelper('layout')->disableLayout();
 
             $params = $this->_request->getParams();
-            if (!array_key_exists('pageIndex', $params) || !array_key_exists('limit', $params) ||
-                !preg_match('/^(\d+)$/', $params['pageIndex']) || !preg_match('/^(\d+)$/', $params['limit'])
+            if (!array_key_exists('page', $params) || !array_key_exists('pagesize', $params) ||
+                !preg_match('/^(\d+)$/', $params['page']) || !preg_match('/^(\d+)$/', $params['pagesize'])
             )
                 exit();
-            //搜索参数
+            /*
+             * 搜索参数
+             * sv1:authid
+             * sv2:accountname
+             * sv3:rolecode
+             * sv4:validstatus
+             */
             $where = array();
-            if (array_key_exists('authid', $params) && preg_match('/^[0-9]{8}$/', $params['authid']))
-                $where['a.authid=?'] = $params['authid'];
-            if (array_key_exists('accountname', $params) && trim($params['accountname']) != '')
-                $where['a.accountname regexp ?'] = trim($params['accountname']);
-            if (array_key_exists('rolecode', $params) && preg_match('/^[A-Z]{2}$/', $params['rolecode']))
-                $where['a.rolecode=?'] = $params['rolecode'];
-            if (array_key_exists('validflag', $params) && preg_match('/^Y|N$/', $params['validflag']))
-                $where['a.validflag=?'] = $params['validflag'];
+            if (array_key_exists('sv1', $params) && preg_match('/^[0-9]{8}$/', $params['sv1']))
+                $where['a.authid=?'] = $params['sv1'];
+            if (array_key_exists('sv2', $params) && trim($params['sv2']) != '')
+                $where['a.accountname regexp ?'] = trim($params['sv2']);
+            if (array_key_exists('sv3', $params) && preg_match('/^[A-Z]{2}$/', $params['sv3']))
+                $where['a.rolecode=?'] = $params['sv3'];
+            if (array_key_exists('sv4', $params) && preg_match('/^0|1$/', $params['sv4']))
+                $where['a.validstatus=?'] = $params['sv4'];
             try {
                 $db = Puppy_Core_Db::getConnection();
                 $modelManager = Puppy_Core_Model_Manager::getInstance();
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_User');
-                $users = $modelManager->core_User->queryUserList($where, $params['limit'], $params['pageIndex'] *
-                                                                                           $params['limit']);
+                $users = $modelManager->core_User->queryUserList($where, $params['pagesize'], ($params['page']-1 )*
+                                                                                           $params['pagesize']);
                 $userCount = $modelManager->core_User->countUser($where);
             } catch (Exception $ex) {
-                //echo $ex->getMessage();
+                echo $ex->getMessage();
                 $users = array();
                 $userCount = 0;
             }
-            $responseBody = array('rows' => $users,
-                'results' => $userCount);
+            $responseBody = array('Rows' => $users,
+                'Total' => $userCount);
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
             $this->_response->setBody(json_encode($responseBody));
         }
@@ -131,11 +135,19 @@ class Core_UserController extends Zend_Controller_Action
             $this->_helper->getHelper('layout')->disableLayout();
 
             $response = array();
+            /*
+             * 接受参数
+             * av1:accountname
+             * av2:credential
+             * av3:rolecode
+             * av4:validstatus
+             */
             $params = $this->_request->getParams();
-            if (!array_key_exists('accountname', $params) || !array_key_exists('password1', $params) ||
+            if (!array_key_exists('av1', $params) || $params['av1']=='' ||
+                !array_key_exists('av2', $params) ||
                 //!preg_match('/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/', $params['password1']) ||
-                !array_key_exists('rolecode', $params) || !preg_match('/^[A-Z]{2}$/', $params['rolecode']) ||
-                !array_key_exists('validflag', $params) || !preg_match('/^Y|N$/', $params['validflag'])
+                !array_key_exists('av4', $params) || !preg_match('/^[A-Z]{2}$/', $params['av4']) ||
+                !array_key_exists('av5', $params) || !preg_match('/^0|1$/', $params['av5'])
             )
                 exit();
 
@@ -148,10 +160,10 @@ class Core_UserController extends Zend_Controller_Action
                 try {
                     $authid = $modelManager->core_User->generateAuthId();
                     $user = array('authid' => $authid,
-                        'accountname' => $params['accountname'],
-                        'credential' => md5($params['password1']),
-                        'rolecode' => $params['rolecode'],
-                        'validflag' => $params['validflag']);
+                        'accountname' => $params['av1'],
+                        'credential' => md5($params['av2']),
+                        'rolecode' => $params['av4'],
+                        'validstatus' => $params['av5']);
                     $affectedRows = $modelManager->core_User->addUser($user);
                     if ($affectedRows > 0)
                         $response = array('success' => true,
@@ -166,6 +178,7 @@ class Core_UserController extends Zend_Controller_Action
             } catch (Exception $ex) {
                 $response = array('success' => false,
                     'info' => $this->view->translator('user_add_failure'));
+                echo $ex->getMessage();
             }
 
             $this->_response->setHeader('content-type', 'application/json;charset=utf-8');
@@ -192,11 +205,18 @@ class Core_UserController extends Zend_Controller_Action
             $this->_helper->getHelper('layout')->disableLayout();
 
             $response = array();
+            /*
+             * 接受参数
+             * ev1:authid
+             * ev2:accountname
+             * ev3:rolecode
+             * ev4:validstatus
+             */
             $params = $this->_request->getParams();
-            if (!array_key_exists('accountname', $params) || $params['accountname'] == '' ||
-                !array_key_exists('authid', $params) || !preg_match('/^[0-9]{8}$/', $params['authid']) ||
-                !array_key_exists('rolecode', $params) || !preg_match('/^[A-Z]{2}$/', $params['rolecode']) ||
-                !array_key_exists('validflag', $params) || !preg_match('/^Y|N$/', $params['validflag'])
+            if (!array_key_exists('ev1', $params) || !preg_match('/^[0-9]{8}$/', $params['ev1']) ||
+                !array_key_exists('ev2', $params) || $params['ev2'] == '' ||
+                !array_key_exists('ev3', $params) || !preg_match('/^[A-Z]{2}$/', $params['ev3']) ||
+                !array_key_exists('ev4', $params) || !preg_match('/^0|1$/', $params['ev4'])
             )
                 exit();
 
@@ -207,10 +227,10 @@ class Core_UserController extends Zend_Controller_Action
                 $modelManager->registerModel('core_User');
                 $db->beginTransaction();
                 try {
-                    $set = array('accountname' => $params['accountname'],
-                        'rolecode' => $params['rolecode'],
-                        'validflag' => $params['validflag']);
-                    $where['authid=?'] = $params['authid'];
+                    $set = array('accountname' => $params['ev2'],
+                        'rolecode' => $params['ev3'],
+                        'validstatus' => $params['ev4']);
+                    $where['authid=?'] = $params['ev1'];
                     $affectedRows = $modelManager->core_User->updateUser($set, $where);
                     $response = array('success' => true,
                         'info' => $this->view->translator('user_edit_success'));

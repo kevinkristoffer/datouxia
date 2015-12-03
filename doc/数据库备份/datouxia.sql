@@ -11,64 +11,77 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- 导出 datouxia 的数据库结构
-DROP DATABASE IF EXISTS `datouxia`;
 CREATE DATABASE IF NOT EXISTS `datouxia` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `datouxia`;
 
 
 -- 导出  表 datouxia.dt_core_forum 结构
-DROP TABLE IF EXISTS `dt_core_forum`;
 CREATE TABLE IF NOT EXISTS `dt_core_forum` (
   `forumid` tinyint(4) NOT NULL AUTO_INCREMENT,
-  `parentid` tinyint(4) DEFAULT NULL,
+  `menuid` tinyint(4) DEFAULT NULL,
+  `parentid` tinyint(4) NOT NULL,
   `forumname` varchar(50) NOT NULL,
   `forumorder` smallint(6) DEFAULT '0',
   `url` varchar(100) DEFAULT NULL,
   `validstatus` enum('0','1') DEFAULT '1',
   PRIMARY KEY (`forumid`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
--- 正在导出表  datouxia.dt_core_forum 的数据：~10 rows (大约)
+-- 正在导出表  datouxia.dt_core_forum 的数据：~6 rows (大约)
 /*!40000 ALTER TABLE `dt_core_forum` DISABLE KEYS */;
-INSERT INTO `dt_core_forum` (`forumid`, `parentid`, `forumname`, `forumorder`, `url`, `validstatus`) VALUES
-	(1, 0, '系统信息', 1, '/core/dashboard', '1'),
-	(2, 0, '管理员版块', 2, NULL, '1'),
-	(3, 2, '用户管理', 1, '/core/user', '1'),
-	(4, 2, '用户组管理', 2, '/core/role', '1'),
-	(5, 2, '权限管理', 3, NULL, '1'),
-	(6, 0, '商户版块', 3, NULL, '1'),
-	(7, 0, '会员版块', 4, NULL, '1'),
-	(8, 0, '团购版块', 5, NULL, '1'),
-	(9, 0, '汽车交易版块', 6, NULL, '1'),
-	(10, 9, '车型库管理', 0, NULL, '1');
+INSERT INTO `dt_core_forum` (`forumid`, `menuid`, `parentid`, `forumname`, `forumorder`, `url`, `validstatus`) VALUES
+	(1, 1, 0, '系统信息', 0, '/core/dashboard', '1'),
+	(2, 1, 0, '管理员版块', 0, NULL, '1'),
+	(3, 1, 2, '管理用户管理', 1, '/core/user', '1'),
+	(4, 1, 2, '用户组管理', 2, '/core/role', '1'),
+	(5, 2, 0, '机动车数据库', 0, NULL, '1'),
+	(6, 2, 5, '车型管理', 1, NULL, '1');
 /*!40000 ALTER TABLE `dt_core_forum` ENABLE KEYS */;
 
 
+-- 导出  表 datouxia.dt_core_menu 结构
+CREATE TABLE IF NOT EXISTS `dt_core_menu` (
+  `menuid` tinyint(4) NOT NULL AUTO_INCREMENT,
+  `menuname` varchar(50) NOT NULL,
+  `menuorder` tinyint(4) DEFAULT '0',
+  PRIMARY KEY (`menuid`)
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+
+-- 正在导出表  datouxia.dt_core_menu 的数据：6 rows
+/*!40000 ALTER TABLE `dt_core_menu` DISABLE KEYS */;
+INSERT INTO `dt_core_menu` (`menuid`, `menuname`, `menuorder`) VALUES
+	(1, '核心后台版块', 1),
+	(2, '汽车交易版块', 2),
+	(3, '商业交易版块', 3),
+	(4, '保险交易版块', 4),
+	(5, '汽车金融版块', 5),
+	(6, '会员版块', 6);
+/*!40000 ALTER TABLE `dt_core_menu` ENABLE KEYS */;
+
+
 -- 导出  表 datouxia.dt_core_role 结构
-DROP TABLE IF EXISTS `dt_core_role`;
 CREATE TABLE IF NOT EXISTS `dt_core_role` (
   `rolecode` char(2) NOT NULL,
   `rolename` varchar(20) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
-  `validflag` enum('Y','N') NOT NULL DEFAULT 'Y',
+  `validstatus` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`rolecode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- 正在导出表  datouxia.dt_core_role 的数据：~7 rows (大约)
 /*!40000 ALTER TABLE `dt_core_role` DISABLE KEYS */;
-INSERT INTO `dt_core_role` (`rolecode`, `rolename`, `description`, `validflag`) VALUES
-	('CA', '普通管理员', '除了管理员管理等核心权限外', 'Y'),
-	('CE', '内容编辑员', '新闻、图片等编辑', 'Y'),
-	('SA', '超级管理员', '所有权限', 'Y'),
-	('TA', '临时管理员1', '', 'Y'),
-	('TB', '临时管理员2', '', 'Y'),
-	('TC', '临时管理员3', '', 'N'),
-	('TD', '临时管理员4', '', 'N');
+INSERT INTO `dt_core_role` (`rolecode`, `rolename`, `description`, `validstatus`) VALUES
+	('CA', '普通管理员', '除了管理员管理等核心权限外', 1),
+	('CE', '内容编辑员', '新闻、图片等编辑', 1),
+	('SA', '超级管理员', '所有权限', 1),
+	('TA', '临时管理员1', '', 1),
+	('TB', '临时管理员2', '', 1),
+	('TC', '临时管理员3', '', 0),
+	('TD', '临时管理员4', '', 0);
 /*!40000 ALTER TABLE `dt_core_role` ENABLE KEYS */;
 
 
 -- 导出  表 datouxia.dt_core_role_privilege 结构
-DROP TABLE IF EXISTS `dt_core_role_privilege`;
 CREATE TABLE IF NOT EXISTS `dt_core_role_privilege` (
   `rolecode` char(2) NOT NULL,
   `forumid` tinyint(4) NOT NULL
@@ -80,50 +93,51 @@ CREATE TABLE IF NOT EXISTS `dt_core_role_privilege` (
 
 
 -- 导出  表 datouxia.dt_core_user 结构
-DROP TABLE IF EXISTS `dt_core_user`;
 CREATE TABLE IF NOT EXISTS `dt_core_user` (
   `authid` char(8) NOT NULL,
   `credential` varchar(32) NOT NULL,
   `accountname` varchar(20) NOT NULL,
   `rolecode` char(2) NOT NULL,
-  `validflag` enum('Y','N') NOT NULL DEFAULT 'Y',
+  `validstatus` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`authid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- 正在导出表  datouxia.dt_core_user 的数据：~26 rows (大约)
 /*!40000 ALTER TABLE `dt_core_user` DISABLE KEYS */;
-INSERT INTO `dt_core_user` (`authid`, `credential`, `accountname`, `rolecode`, `validflag`) VALUES
-	('07256985', '25f9e794323b453885f5181f1b624d0b', '林志玲', 'CE', 'N'),
-	('07256986', '1d42abef5a4a5748edf45448bc8d64c5', '王宝强', 'SA', 'Y'),
-	('07256987', 'e10adc3949ba59abbe56e057f20f883e', '道明寺', 'CA', 'Y'),
-	('07256988', 'e10adc3949ba59abbe56e057f20f883e', '柳岩', 'CA', 'N'),
-	('07256989', 'e10adc3949ba59abbe56e057f20f883e', '萧蔷', 'TA', 'N'),
-	('07256990', 'e10adc3949ba59abbe56e057f20f883e', '葛优', 'TA', 'Y'),
-	('07256991', 'e10adc3949ba59abbe56e057f20f883e', '测试账户1', 'CE', 'Y'),
-	('07256992', 'e10adc3949ba59abbe56e057f20f883e', '测试账户2', 'TA', 'N'),
-	('07256993', 'e10adc3949ba59abbe56e057f20f883e', '测试账户3', 'TA', 'Y'),
-	('07256994', 'e10adc3949ba59abbe56e057f20f883e', '测试账户4', 'TA', 'Y'),
-	('07256995', 'e10adc3949ba59abbe56e057f20f883e', '测试账户5', 'TA', 'N'),
-	('07256996', 'e10adc3949ba59abbe56e057f20f883e', '测试账户6', 'TA', 'N'),
-	('07256997', 'e10adc3949ba59abbe56e057f20f883e', '测试账户7', 'TA', 'Y'),
-	('07256998', 'e10adc3949ba59abbe56e057f20f883e', '测试账户8', 'TA', 'Y'),
-	('07256999', 'e10adc3949ba59abbe56e057f20f883e', '测试账户9', 'TB', 'Y'),
-	('07257000', 'e10adc3949ba59abbe56e057f20f883e', '测试账户10', 'TA', 'N'),
-	('07257001', 'e10adc3949ba59abbe56e057f20f883e', '测试账户11', 'TB', 'Y'),
-	('07257002', 'e10adc3949ba59abbe56e057f20f883e', '测试账户12', 'TA', 'N'),
-	('07257003', 'e10adc3949ba59abbe56e057f20f883e', '测试账户13', 'TA', 'Y'),
-	('07257004', 'e10adc3949ba59abbe56e057f20f883e', '测试账户14', 'TA', 'N'),
-	('07257005', 'e10adc3949ba59abbe56e057f20f883e', '测试账户15', 'TA', 'Y'),
-	('07257006', 'e10adc3949ba59abbe56e057f20f883e', '测试账户16', 'TA', 'Y'),
-	('07257007', '785140572341852e48c20dac3dc2c57d', '朱之鑫', 'TA', 'Y'),
-	('07257008', '785140572341852e48c20dac3dc2c57d', '雪村', 'TB', 'N'),
-	('07257009', '785140572341852e48c20dac3dc2c57d', '张磊', 'CA', 'Y'),
-	('07257010', '785140572341852e48c20dac3dc2c57d', '郭晓阳', 'CE', 'Y');
+INSERT INTO `dt_core_user` (`authid`, `credential`, `accountname`, `rolecode`, `validstatus`) VALUES
+	('07256985', '25f9e794323b453885f5181f1b624d0b', '林志玲', 'CE', 1),
+	('07256986', '1d42abef5a4a5748edf45448bc8d64c5', '王宝强', 'SA', 1),
+	('07256987', 'e10adc3949ba59abbe56e057f20f883e', '道明寺', 'CA', 1),
+	('07256988', 'e10adc3949ba59abbe56e057f20f883e', '柳岩', 'CA', 1),
+	('07256989', 'e10adc3949ba59abbe56e057f20f883e', '萧蔷', 'TA', 1),
+	('07256990', 'e10adc3949ba59abbe56e057f20f883e', '葛优', 'TA', 0),
+	('07256991', 'e10adc3949ba59abbe56e057f20f883e', '测试账户1', 'CE', 0),
+	('07256992', 'e10adc3949ba59abbe56e057f20f883e', '测试账户2', 'TA', 1),
+	('07256993', 'e10adc3949ba59abbe56e057f20f883e', '测试账户3', 'TA', 1),
+	('07256994', 'e10adc3949ba59abbe56e057f20f883e', '测试账户4', 'TA', 0),
+	('07256995', 'e10adc3949ba59abbe56e057f20f883e', '测试账户5', 'TA', 1),
+	('07256996', 'e10adc3949ba59abbe56e057f20f883e', '测试账户6', 'CE', 1),
+	('07256997', 'e10adc3949ba59abbe56e057f20f883e', '测试账户7', 'TA', 0),
+	('07256998', 'e10adc3949ba59abbe56e057f20f883e', '测试账户8', 'TA', 1),
+	('07256999', 'e10adc3949ba59abbe56e057f20f883e', '测试账户9', 'TB', 0),
+	('07257000', 'e10adc3949ba59abbe56e057f20f883e', '测试账户10', 'TA', 0),
+	('07257001', 'e10adc3949ba59abbe56e057f20f883e', '测试账户11', 'TB', 1),
+	('07257002', 'e10adc3949ba59abbe56e057f20f883e', '测试账户12', 'TB', 0),
+	('07257003', 'e10adc3949ba59abbe56e057f20f883e', '测试账户13', 'TA', 1),
+	('07257004', 'e10adc3949ba59abbe56e057f20f883e', '测试账户14', 'TA', 1),
+	('07257005', 'e10adc3949ba59abbe56e057f20f883e', '测试账户15', 'TA', 1),
+	('07257006', 'e10adc3949ba59abbe56e057f20f883e', '测试账户16', 'TA', 0),
+	('07257007', '785140572341852e48c20dac3dc2c57d', '朱之鑫', 'TA', 1),
+	('07257008', '785140572341852e48c20dac3dc2c57d', '雪村', 'TB', 1),
+	('07257009', '785140572341852e48c20dac3dc2c57d', '张磊', 'CA', 1),
+	('07257010', '785140572341852e48c20dac3dc2c57d', '郭晓阳', 'CE', 0),
+	('07257011', '785140572341852e48c20dac3dc2c57d', '蔡依林', 'TA', 1),
+	('07257012', '785140572341852e48c20dac3dc2c57d', '范冰冰', 'CA', 0),
+	('07257013', '785140572341852e48c20dac3dc2c57d', '陈冠希', 'TB', 0);
 /*!40000 ALTER TABLE `dt_core_user` ENABLE KEYS */;
 
 
 -- 导出  表 datouxia.dt_vehicle_model 结构
-DROP TABLE IF EXISTS `dt_vehicle_model`;
 CREATE TABLE IF NOT EXISTS `dt_vehicle_model` (
   `vehicleid` varchar(14) NOT NULL,
   `vehiclename` varchar(50) NOT NULL,

@@ -2,102 +2,81 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/layout.css">
-    <title>XXX门户管理后台</title>
+    <title>门户管理后台</title>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div id="J_Layout"></div>
+<div id="wrapper">
+    <div id="frametop" position="top">
+        <h3>头部LOGO</h3>
+    </div>
+    <div id="frameleft" position="left" title="导航菜单">
+        <?php foreach($this->menus as $menuItem): ?>
+        <div title="<?php echo $menuItem->mname; ?>">
+            <ul class="tree_nav" mid="<?php echo $menuItem->mid; ?>"></ul>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <div id="framecenter" position="center">
+
     </div>
 </div>
 
-<!-- JS -->
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
 <script type="text/javascript">
-    var baseUrl = '<?php echo $this->baseUrl();?>';
-    var forumData =<?php echo $this->forums; ?>;
+    var baseUrl='<?php echo $this->baseUrl();?>';
+    var menusObj=eval('<?php echo $this->menusJSON;?>');
+    var menus={};
+    for(var i=0;i<menusObj.length;i++){
+        menus['item'+menusObj[i].mid]=menusObj[i].forums;
+    }
 </script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/plugins/cookie/jquery.cookie.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/sys/client.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/mikoUI/js/mikoui.all.js"></script>
 <script type="text/javascript">
-    var browserWidth = window.screen.width;
-    var browserHeight = window.screen.height;
-    $('#J_Layout').css({marginTop: browserHeight * 0.025});
-
-    BUI.use(['bui/layout', 'bui/tree', 'bui/data', 'bui/tab'], function (Layout, Tree, Data, Tab) {
-        var mynav, mytree;
-        var store = new Data.TreeStore({
-            pidField: 'pid',
-            root: {
-                id: 0,
-                text: 'sidebar'
-            },
-            data: forumData
+    $(function(){
+        $('#wrapper').mikoLayout({
+            topHeight:80,
+            allowTopResize:false,
+            leftWidth:250,
+            minLeftWidth:200
         });
-        var control = new BUI.Component.Controller({
-            width: browserWidth * 0.75,
-            height: browserHeight * 0.65,
-            render: '#J_Layout',
-            elCls: 'ext-border-layout',
-            children: [{
-                xclass: 'controller',
-                layout: {
-                    region: 'north',
-                    height: 80
-                },
-                content: '网站头部LOGO'
-            }, {
-                xclass: 'controller',
-                layout: {
-                    region: 'south',
-                    height: 50
-                },
-                content: '网站底部'
-            }, {
-                xclass: 'tree-list',
-                layout: {
-                    title: '导航栏',
-                    region: 'west',
-                    fit: 'both',
-                    collapsable: true,
-                    width: 200
-                },
-                id: 'mytree',
-                store: store,
-                listeners: {
-                    itemclick: function (e) {
-                        if (e.item != null && e.item.leaf) {
-                            var config = {
-                                id: e.item.id,
-                                title: e.item.text,
-                                href: baseUrl + e.item.url
-                            };
-                            mynav.addTab(config);
-                        }
+        $('#frameleft').mikoAccordion({});
+        var tab=null;
+        var mid,url,pid,fid,text;
+        $('.tree_nav').each(function(i){
+            mid=$(this).attr('mid');
+            tree=$(this).mikoTree({
+                nodeWidth:150,
+                data:eval('menus.item'+mid),
+                idFieldName:'fid',
+                parentIDFieldName:'pid',
+                textFieldName:'fname',
+                checkbox:false,
+                onClick:function(data,target){
+                    url=data.data.url;
+                    pid=data.data.pid || 0;
+                    fid=data.data.fid || 0;
+                    text=data.data.fname;
+                    if(url){
+                        f_addtab(pid+'_'+fid,text,baseUrl+url);
                     }
                 }
-            }, {
-                xclass: 'nav-tab',
-                layout: {
-                    region: 'center',
-                    fit: 'both'
-                },
-                id: 'mynav',
-                children: [{
-                    id: 0,
-                    title: '主页',
-                    href: baseUrl + '/',
-                    actived: true,
-                    closeable: false
-                }]
-            }],
-            plugins: [Layout.Border]
+            });
+            tree.collapseAll();
         });
-        control.render();
-        mynav = control.getChild('mynav');
-        mytree = control.getChild('mytree');
+        $('#framecenter').mikoTab({});
+        tab=miko.get('framecenter');
+
+        function f_addtab(tabid,text,url){
+            tab.addTabItem({
+                tabid: tabid,
+                text: text,
+                url: url,
+                height:650,
+                callback: function () {}
+            });
+        }
     });
 </script>
 </body>

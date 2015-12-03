@@ -146,7 +146,7 @@ class Zend_Service_Amazon_Sqs extends Zend_Service_Amazon_Abstract
      *
      * Since there is not an SQS webserive to get all possible endpoints, a hardcoded list is available.
      * For the actual region list please check:
-     * http://docs.amazonwebservices.com/AWSSimpleQueueService/2009-02-01/APIReference/index.phtml?QueueServiceWsdlArticle.html
+     * http://docs.amazonwebservices.com/AWSSimpleQueueService/2009-02-01/APIReference/index2.phtml?QueueServiceWsdlArticle.html
      *
      * @param  string  $region region
      * @return array

@@ -154,7 +154,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      * (.CAT) Catalan http://www.iana.org/domains/idn-tables/tables/cat_ca_1.0.html
      * (.CH) Switzerland https://nic.switch.ch/reg/ocView.action?res=EF6GW2JBPVTG67DLNIQXU234MN6SC33JNQQGI7L6#anhang1
      * (.CL) Chile http://www.iana.org/domains/idn-tables/tables/cl_latn_1.0.html
-     * (.COM) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index.phtml
+     * (.COM) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index2.phtml
      * (.DE) Germany http://www.denic.de/en/domains/idns/liste.html
      * (.DK) Danmark http://www.dk-hostmaster.dk/index.php?id=151
      * (.ES) Spain https://www.nic.es/media/2008-05/1210147705287.pdf
@@ -170,7 +170,7 @@ class Zend_Validate_Hostname extends Zend_Validate_Abstract
      * (.LT) Lithuania http://www.domreg.lt/static/doc/public/idn_symbols-en.pdf
      * (.MD) Moldova http://www.register.md/
      * (.MUSEUM) International http://www.iana.org/domains/idn-tables/tables/museum_latn_1.0.html
-     * (.NET) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index.phtml
+     * (.NET) International http://www.verisign.com/information-services/naming-services/internationalized-domain-names/index2.phtml
      * (.NO) Norway http://www.norid.no/domeneregistrering/idn/idn_nyetegn.en.html
      * (.NU) Niue http://www.worldnames.net/
      * (.ORG) International http://www.pir.org/index.php?db=content/FAQs&tbl=FAQs_Registrant&id=2

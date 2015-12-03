@@ -5,7 +5,12 @@ class Core_RoleController extends Zend_Controller_Action
 
     public function indexAction()
     {
-
+        $db = Puppy_Core_Db::getConnection();
+        $modelManager = Puppy_Core_Model_Manager::getInstance();
+        $modelManager->setDbConnection($db);
+        $modelManager->registerModel('core_Forum');
+        $forums = $modelManager->core_Forum->queryValidForum();
+        $this->view->assign('forums', json_encode($forums, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES));
     }
 
     public function listAction()
@@ -25,11 +30,12 @@ class Core_RoleController extends Zend_Controller_Action
                 $modelManager->setDbConnection($db);
                 $modelManager->registerModel('core_Role');
                 $params = $this->_request->getParams();
+
                 if (array_key_exists('valid', $params) && trim($params['valid']) == 'true') {
-                    $where = array('validflag=?' => 'Y');
-                    $fields = array('value'=>'rolecode',
-                        'text'=>'rolename');
-                    $roles = $modelManager->core_Role->queryRoleList($where,$fields);
+                    $where = array('validstatus=?' => '1');
+                    $fields = array('id' => 'rolecode',
+                        'text' => 'rolename');
+                    $roles = $modelManager->core_Role->queryRoleList($where, $fields);
                 }
                 else {
                     $roles = $modelManager->core_Role->queryRoleList();

@@ -2,348 +2,362 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
-    <title>用户管理</title>
+    <title>管理员用户管理</title>
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/css/blueprint/grid.css" type="text/css" media="screen, projection" />
+    <style type="text/css">
+        .l-table-edit { }
+        .l-table-edit-td { padding:4px; }
+    </style>
 </head>
 <body>
-<div class="container">
-    <div id="user-grid" style="margin:10px;"></div>
+<div class="container" style="margin-top:20px;">
+    <div class="span-24 last">
+        <div id="user-grid"></div>
+    </div>
 </div>
-<div id="user-search" class="hide">
-    <form id="search-form" class="form-horizontal">
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">用户编号</label>
-                <div class="controls">
-                    <input type="text" name="authid" class="input-small control-text" data-messages="{regexp:'无效编号'}" data-rules="{regexp:/^$|^[0-9]{8}$/}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">帐号关键字</label>
-                <div class="controls">
-                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{maxlength:20}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">所在用户组</label>
-                <div class="controls">
-                    <select name="rolecode">
-                        <option value="">请选择</option>
-                        <?php foreach($this->roles as $item):?>
-                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">当前状态</label>
-                <div class="controls">
-                    <select name="validflag" class="input-normal">
-                        <option value="">请选择</option>
-                        <option value="Y">有效</option>
-                        <option value="N">无效</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </form>
+<!-- 搜索用户框 -->
+<div id="search-dialog" style="display:none;">
+    <div>
+        <table cellpadding="0" cellspacing="0" class="l-table-edit" >
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>用户编号</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf1"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>帐号名称</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf2"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>所在用户组</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf3"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>是否有效</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf4"/></td>
+            </tr>
+        </table>
+    </div>
 </div>
-<!-- add form -->
-<div id="user-add" class="hide">
-    <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/add" method="post">
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">帐号名称</label>
-                <div class="controls">
-                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span16">
-                <label class="control-label">输入密码</label>
-                <div class="controls">
-                    <input type="password" id="p11" name="password1" class="input-normal control-text" data-messages="{regexp:'密码8到20位且含数字、字母、特殊字符'}" data-rules="{regexp:/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span16">
-                <label class="control-label">确认密码</label>
-                <div class="controls">
-                    <input type="password" name="password2" class="input-normal control-text" data-rules="{required:true,equalTo:'#p11'}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">所在用户组</label>
-                <div class="controls">
-                    <select name="rolecode">
-                        <?php foreach($this->roles as $item):?>
-                        <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">设置状态</label>
-                <div class="controls">
-                    <select name="validflag" class="input-normal">
-                        <option value="Y">有效</option>
-                        <option value="N">无效</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </form>
+<!-- 新增用户框 -->
+<div id="add-dialog" style="display:none;">
+    <div>
+        <table cellpadding="0" cellspacing="0" class="l-table-edit" >
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>帐号名称</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="af1"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>输入密码</label></td>
+                <td align="left" class="l-table-edit-td"><input type="password" id="af2"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>确认密码</label></td>
+                <td align="left" class="l-table-edit-td"><input type="password" id="af3"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>所在用户组</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="af4"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>是否有效</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="af5"/></td>
+            </tr>
+        </table>
+    </div>
 </div>
-<!-- edit form -->
-<div id="user-edit" class="hide">
-    <form id="edit-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/edit" method="post">
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">帐号名称</label>
-                <div class="controls">
-                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">所在用户组</label>
-                <div class="controls">
-                    <select name="rolecode">
-                        <?php foreach($this->roles as $item):?>
-                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">设置状态</label>
-                <div class="controls">
-                    <select name="validflag" class="input-normal">
-                        <option value="Y">有效</option>
-                        <option value="N">无效</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <input type="hidden" name="authid" value=""/>
-    </form>
+<!-- 编辑用户框 -->
+<div id="edit-dialog" style="display:none;">
+    <div>
+        <table cellpadding="0" cellspacing="0" class="l-table-edit" >
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>用户编号</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="ef1"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>帐号名称</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="ef2"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>所在用户组</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="ef3"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>是否有效</label></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="ef4"/></td>
+            </tr>
+        </table>
+    </div>
 </div>
-<!-- JS -->
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
+
 <script type="text/javascript">
-    var baseUrl="<?php echo $this->baseUrl(); ?>";
+    var baseUrl='<?php echo $this->baseUrl();?>';
+    var roles=<?php echo $this->rolesJSON; ?>;
 </script>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->baseUrl(); ?>/js/mikoUI/skins/mikoui-icons.css" />
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/plugins/cookie/jquery.cookie.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/sys/client.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/mikoUI/js/mikoui.all.js"></script>
 <script type="text/javascript">
-    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
-        var searchForm,addForm,editForm,searchDialog,addDialog,editDialog,userStore,columns,grid;
-        userStore=new Data.Store({
+    $(function(){
+        var g,button;
+        $('#user-grid').mikoGrid({
             url:baseUrl+'/core/user/list',
-            proxy:{
-                method:'post'
-            },
-            autoLoad:true,
-            pageSize:6
-        });
-        columns=[{
-            title:'用户编号',dataIndex:'authid',width:100,elCls:'center'
-        },{
-            title:'帐号名称',dataIndex:'accountname',width:100,elCls:'center'
-        },{
-            title:'用户组',dataIndex:'rolename',width:120,elCls:'center'
-        },{
-            title:'当前状态',dataIndex:'valid',width:80,elCls:'center',renderer:function(value,obj){
-                return obj.validflag=='Y' ? '有效' : '无效';
-            }
-        }];
-        grid=new Grid.Grid({
-            render:'#user-grid',
-            width:480,
-            columns:columns,
-            loadMask:true,
-            store:userStore,
-            plugins:[Grid.Plugins.RowNumber],
-            tbar:{
+            width:580,
+            columns:[{
+                display:'用户编号',name:'authid',width:150
+            },{
+                display:'帐号',name:'accountname',width:150
+            },{
+                display:'用户组',name:'rolename',width:150
+            },{
+                display:'状态',name:'validstatus',width:100,render:function(rowdata,rowindex,value){
+                    return value=='1' ? '有效' : '无效';
+                }
+            }],
+            toolbar:{
                 items:[{
-                    btnCls:'button button-small',
-                    text:'<i class="icon-search"></i>搜索',
-                    listeners:{
-                        click:function(){
-                            searchDialog.show();
-                        }
-                    }
-                },{
-                    btnCls:'button button-small',
-                    text:'<i class="icon-plus-sign"></i>新增',
-                    listeners:{
-                        click:function(){
-                            addDialog.show();
-                        }
-                    }
-                },{
-                    btnCls:'button button-small',
-                    text:'<i class="icon-edit"></i>编辑',
-                    listeners:{
-                        click:function(){
-                            var selection=grid.getSelected();
-                            if(selection){
-                                //console.log(selection.authid);
-                                $.post(baseUrl+'/core/user/item',{'id':selection.authid},function(data){
-                                    if(data.success){
-                                        editForm.getField('accountname').set('value',data.data.accountname);
-                                        editForm.getField('rolecode').set('value',data.data.rolecode);
-                                        editForm.getField('validflag').set('value',data.data.validflag);
-                                        editForm.getField('authid').set('value',data.data.authid);
-                                        editDialog.show();
+                    text: '搜索',
+                    icon: 'search',
+                    click:function(){
+                        $.mikoDialog.open({
+                            target:$('#search-dialog'),
+                            title:'搜索用户',
+                            buttons:[{
+                                text:'搜索',
+                                cls:'l-dialog-btn-highlight',
+                                onclick:function(item,dialog){
+                                    var sv1= $.trim(miko.get('sf1').getValue());
+                                    var sv2=$.trim(miko.get('sf2').getValue());
+                                    var sv3=miko.get('sf3').getValue();
+                                    var sv4=miko.get('sf4').getValue();
+                                    if(sv1!='' && !/^[0-9]{8}$/.test(sv1)){
+                                        $.mikoDialog.error('用户编号格式错误');
+                                        return;
                                     }
-                                });
-                            }else{
-                                BUI.Message.Alert('请选择用户','warning');
-                            }
+                                    if(sv2!='' && sv2.length>20){
+                                        $.mikoDialog.error('帐号关键字长度超出规定字数');
+                                        return;
+                                    }
+                                    g.setParm('sv1',sv1);
+                                    g.setParm('sv2',sv2);
+                                    g.setParm('sv3',sv3);
+                                    g.setParm('sv4',sv4);
+                                    g.reload();
+                                    dialog.hide();
+                                }
+                            },{
+                                text:'取消',
+                                onclick:function(item,dialog){
+                                    dialog.hide();
+                                }
+                            }]
+                        });
+                    }
+                },{
+                    line:true
+                },{
+                    text: '新增',
+                    icon: 'add',
+                    click:function(){
+                        $.mikoDialog.open({
+                            target:$('#add-dialog'),
+                            title:'新增用户',
+                            buttons:[{
+                                text:'确认提交',
+                                cls:'l-dialog-btn-highlight',
+                                onclick:function(item,dialog){
+                                    var av1=$.trim(miko.get('af1').getValue());
+                                    var av2=miko.get('af2').getValue();
+                                    var av3=miko.get('af3').getValue();
+                                    var av4=miko.get('af4').getValue();
+                                    var av5=miko.get('af5').getValue();
+                                    if(av1=='' || av1.length>10){
+                                        $.mikoDialog.error('请输入正确的帐号名称');
+                                        return;
+                                    }
+                                    if(!/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/.test(av2)){
+                                        $.mikoDialog.error('密码为8到20位且含数字、字母、特殊字符');
+                                        return;
+                                    }
+                                    if(av2!=av3){
+                                        $.mikoDialog.error('两次密码输入不一致');
+                                        return;
+                                    }
+                                    if(av4==''){
+                                        $.mikoDialog.error('请选择用户所在的用户组');
+                                        return;
+                                    }
+                                    if(av5==''){
+                                        $.mikoDialog.error('请选择用户初始状态');
+                                        return;
+                                    }
+                                    $.post(baseUrl+'/core/user/add',{
+                                        av1:av1,
+                                        av2:av2,
+                                        av4:av4,
+                                        av5:av5
+                                    },function(data){
+                                        if(data.success){
+                                            $.mikoDialog.success(data.info);
+                                            g.reload();
+                                            miko.get('af1').setValue('');
+                                            miko.get('af2').setValue('');
+                                            miko.get('af3').setValue('');
+                                            miko.get('af4').setValue('');
+                                            miko.get('af5').setValue('');
+                                            dialog.hide();
+                                        }else{
+                                            $.mikoDialog.error(data.info);
+                                        }
+                                    });
+                                }
+                            },{
+                                text:'取消',
+                                onclick:function(item,dialog){
+                                    dialog.hide();
+                                }
+                            }]
+                        });
+                    }
+                },{
+                    line:true
+                },{
+                    text: '编辑',
+                    icon: 'modify',
+                    click:function(){
+                        var selection= g.getSelected();
+                        if(selection){
+                            miko.get('ef1').setValue(selection.authid);
+                            miko.get('ef2').setValue(selection.accountname);
+                            miko.get('ef3').setValue(selection.rolecode);
+                            miko.get('ef4').setValue(selection.validstatus);
+                            $.mikoDialog.open({
+                                target:$('#edit-dialog'),
+                                title:'编辑用户',
+                                buttons:[{
+                                    text:'确认提交',
+                                    cls:'l-dialog-btn-highlight',
+                                    onclick:function(item,dialog){
+                                        var ev1=miko.get('ef1').getValue();
+                                        var ev2=miko.get('ef2').getValue();
+                                        var ev3=miko.get('ef3').getValue();
+                                        var ev4=miko.get('ef4').getValue();
+                                        if(ev2=='' || ev2.length>10){
+                                            $.mikoDialog.error('请输入正确的帐号名称');
+                                            return;
+                                        }
+                                        $.post(baseUrl+'/core/user/edit',{
+                                            ev1:ev1,
+                                            ev2:ev2,
+                                            ev3:ev3,
+                                            ev4:ev4
+                                        },function(data){
+                                            if(data.success){
+                                                $.mikoDialog.success(data.info);
+                                                g.reload();
+                                                dialog.hide();
+                                            }else{
+                                                $.mikoDialog.error(data.info);
+                                            }
+                                        });
+
+                                    }
+                                },{
+                                    text:'取消',
+                                    onclick:function(item,dialog){
+                                        dialog.hide();
+                                    }
+                                }]
+                            });
+                        }else{
+                            $.mikoDialog.warn('请选择用户');
                         }
+                    }
+                },{
+                    line:true
+                },{
+                    text: '密码重置',
+                    icon: 'lock',
+                    click:function(){
+
                     }
                 }]
-            },
-            bbar:{
-                pagingBar:true
-            },
-            autoRender:true
-        });
-        //搜索表单
-        searchForm=new Form.HForm({
-            srcNode:'#search-form'
-        }).render();
-        var searchFlag=true;    //防止多次提交查询
-        searchDialog=new Overlay.Dialog({
-            title:'搜索用户',
-            width:350,
-            height:235,
-            contentId:'user-search',
-            buttons:[{
-                text:'搜索',
-                elCls : 'button button-primary',
-                handler : function(){
-                    if(searchForm.isValid() && searchFlag){
-                        searchFlag=false;
-                        var authid=searchForm.getField('authid').get('value');
-                        var accountname=searchForm.getField('accountname').get('value');
-                        var rolecode=searchForm.getField('rolecode').get('value');
-                        var validflag=searchForm.getField('validflag').get('value');
-                        userStore.load({
-                            'authid':authid,
-                            'accountname':accountname,
-                            'rolecode':rolecode,
-                            'validflag':validflag,
-                            'start':0,
-                            'pageIndex':0
-                        });
-                        userStore.on('load',function(){
-                            searchFlag=true;
-                            searchDialog.close();
-                        });
-                    }
-                }
-            },{
-                text:'重置',
-                elCls : 'button button-primary',
-                handler:function(){
-                    searchForm.getField('authid').set('value','');
-                    searchForm.getField('accountname').set('value','');
-                    searchForm.getField('rolecode').set('value','');
-                    searchForm.getField('validflag').set('value','');
-                }
-            }]
-        });
-        //新建表单
-        var addFlag=true;   //防止重复提交表单
-        addForm=new Form.HForm({
-            srcNode:'#add-form',
-            submitType:'ajax',
-            callback:function(data){
-                if(data.success){
-                    BUI.Message.Alert(data.info,'success');
-                    resetAddForm();
-                    addDialog.close();
-                    userStore.load();
-                }else{
-                    BUI.Message.Alert(data.info,'error');
-                }
-                addFlag=true;
             }
-        }).render();
-        addDialog=new Overlay.Dialog({
-            title: '新建用户',
-            width: 450,
-            height: 275,
-            contentId: 'user-add',
-            buttons:[{
-                text:'确认提交',
-                elCls : 'button button-primary',
-                handler : function(){
-                    if(addForm.isValid() && addFlag){
-                        addFlag=false;
-                        addForm.submit();
-                    }
-                }
-            },{
-                text:'重置',
-                elCls : 'button button-primary',
-                handler : resetAddForm
-            }]
         });
-        function resetAddForm(){
-            addForm.getField('accountname').set('value','');
-            addForm.getField('password1').set('value','');
-            addForm.getField('password2').set('value','');
-            addForm.getField('validflag').set('value','Y');
-        };
-        //编辑表单
-        var editFlag=true;   //防止重复提交表单
-        editForm=new Form.HForm({
-            srcNode:'#edit-form',
-            submitType:'ajax',
-            callback:function(data){
-                if(data.success){
-                    BUI.Message.Alert(data.info,'success');
-                    editDialog.close();
-                    userStore.load();
-                }else{
-                    BUI.Message.Alert(data.info,'error');
-                }
-                editFlag=true;
-            }
-        }).render();
-        editDialog=new Overlay.Dialog({
-            title: '编辑用户',
-            width: 450,
-            height: 190,
-            contentId: 'user-edit',
-            buttons:[{
-                text:'确认提交',
-                elCls : 'button button-primary',
-                handler : function(){
-                    if(editForm.isValid() && editFlag){
-                        editFlag=false;
-                        editForm.submit();
-                    }
-                }
-            }]
+        g=$('#user-grid').mikoGetGridManager();
+        /**
+         * 搜索用户框
+         */
+        $('#sf1').mikoTextBox({
+            width:150
+        });
+        $('#sf2').mikoTextBox({
+            width:150
+        });
+        $('#sf3').mikoComboBox({
+            data:roles,
+            width:100,
+            selectBoxWidth:100,
+            selectBoxHeight:100,
+            valueField:'id',
+            textField:'text',
+            slide:true
+        });
+        $('#sf4').mikoComboBox({
+            width:100,
+            data:[{id:'1',text:'是'},{id:'0',text:'否'}]
+        });
+        /**
+         * 新增用户框
+         */
+        $('#af1').mikoTextBox({
+            width:150
+        });
+        $('#af2').mikoTextBox({
+            width:150
+        });
+        $('#af3').mikoTextBox({
+            width:150
+        });
+        $('#af4').mikoComboBox({
+            data:roles,
+            width:100,
+            selectBoxWidth:100,
+            selectBoxHeight:100,
+            valueField:'id',
+            textField:'text',
+            slide:true
+        });
+        $('#af5').mikoComboBox({
+            width:100,
+            cancelable:false,
+            data:[{id:'1',text:'是'},{id:'0',text:'否'}]
+        });
+        /**
+         * 编辑用户框
+         */
+        $('#ef1').mikoTextBox({
+            width:150,
+            disabled:true
+        });
+        $('#ef2').mikoTextBox({
+            width:150
+        });
+        $('#ef3').mikoComboBox({
+            data:roles,
+            cancelable:false,
+            width:100,
+            selectBoxWidth:100,
+            selectBoxHeight:100,
+            valueField:'id',
+            textField:'text',
+            slide:true
+        });
+        $('#ef4').mikoComboBox({
+            width:100,
+            cancelable:false,
+            data:[{id:'1',text:'是'},{id:'0',text:'否'}]
         });
     });
 </script>

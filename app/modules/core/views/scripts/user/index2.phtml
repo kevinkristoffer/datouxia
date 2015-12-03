@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
+    <title>用户管理</title>
+</head>
+<body>
+<div class="container">
+    <div id="user-grid" style="margin:10px;"></div>
+</div>
+<div id="user-search" class="hide">
+    <form id="search-form" class="form-horizontal">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">用户编号</label>
+                <div class="controls">
+                    <input type="text" name="authid" class="input-small control-text" data-messages="{regexp:'无效编号'}" data-rules="{regexp:/^$|^[0-9]{8}$/}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">帐号关键字</label>
+                <div class="controls">
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <select name="rolecode">
+                        <option value="">请选择</option>
+                        <?php foreach($this->roles as $item):?>
+                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="">请选择</option>
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- add form -->
+<div id="user-add" class="hide">
+    <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/add" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">帐号名称</label>
+                <div class="controls">
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span16">
+                <label class="control-label">输入密码</label>
+                <div class="controls">
+                    <input type="password" id="p11" name="password1" class="input-normal control-text" data-messages="{regexp:'密码8到20位且含数字、字母、特殊字符'}" data-rules="{regexp:/^(?![a-zA-Z0-9]+$)(?![^a-zA-Z/D]+$)(?![^0-9/D]+$).{8,20}$/}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span16">
+                <label class="control-label">确认密码</label>
+                <div class="controls">
+                    <input type="password" name="password2" class="input-normal control-text" data-rules="{required:true,equalTo:'#p11'}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <select name="rolecode">
+                        <?php foreach($this->roles as $item):?>
+                        <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">设置状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- edit form -->
+<div id="user-edit" class="hide">
+    <form id="edit-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/user/edit" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">帐号名称</label>
+                <div class="controls">
+                    <input type="text" name="accountname" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">所在用户组</label>
+                <div class="controls">
+                    <select name="rolecode">
+                        <?php foreach($this->roles as $item):?>
+                            <option value="<?php echo $item->rolecode; ?>"><?php echo $item->rolename; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">设置状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="authid" value=""/>
+    </form>
+</div>
+<!-- JS -->
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
+<script type="text/javascript">
+    var baseUrl="<?php echo $this->baseUrl(); ?>";
+</script>
+<script type="text/javascript">
+    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
+        var searchForm,addForm,editForm,searchDialog,addDialog,editDialog,userStore,columns,grid;
+        userStore=new Data.Store({
+            url:baseUrl+'/core/user/list',
+            proxy:{
+                method:'post'
+            },
+            autoLoad:true,
+            pageSize:6
+        });
+        columns=[{
+            title:'用户编号',dataIndex:'authid',width:100,elCls:'center'
+        },{
+            title:'帐号名称',dataIndex:'accountname',width:100,elCls:'center'
+        },{
+            title:'用户组',dataIndex:'rolename',width:120,elCls:'center'
+        },{
+            title:'当前状态',dataIndex:'valid',width:80,elCls:'center',renderer:function(value,obj){
+                return obj.validflag=='Y' ? '有效' : '无效';
+            }
+        }];
+        grid=new Grid.Grid({
+            render:'#user-grid',
+            width:480,
+            columns:columns,
+            loadMask:true,
+            store:userStore,
+            plugins:[Grid.Plugins.RowNumber],
+            tbar:{
+                items:[{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-search"></i>搜索',
+                    listeners:{
+                        click:function(){
+                            searchDialog.show();
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-plus-sign"></i>新增',
+                    listeners:{
+                        click:function(){
+                            addDialog.show();
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-edit"></i>编辑',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                //console.log(selection.authid);
+                                $.post(baseUrl+'/core/user/item',{'id':selection.authid},function(data){
+                                    if(data.success){
+                                        editForm.getField('accountname').set('value',data.data.accountname);
+                                        editForm.getField('rolecode').set('value',data.data.rolecode);
+                                        editForm.getField('validflag').set('value',data.data.validflag);
+                                        editForm.getField('authid').set('value',data.data.authid);
+                                        editDialog.show();
+                                    }
+                                });
+                            }else{
+                                BUI.Message.Alert('请选择用户','warning');
+                            }
+                        }
+                    }
+                }]
+            },
+            bbar:{
+                pagingBar:true
+            },
+            autoRender:true
+        });
+        //搜索表单
+        searchForm=new Form.HForm({
+            srcNode:'#search-form'
+        }).render();
+        var searchFlag=true;    //防止多次提交查询
+        searchDialog=new Overlay.Dialog({
+            title:'搜索用户',
+            width:350,
+            height:235,
+            contentId:'user-search',
+            buttons:[{
+                text:'搜索',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(searchForm.isValid() && searchFlag){
+                        searchFlag=false;
+                        var authid=searchForm.getField('authid').get('value');
+                        var accountname=searchForm.getField('accountname').get('value');
+                        var rolecode=searchForm.getField('rolecode').get('value');
+                        var validflag=searchForm.getField('validflag').get('value');
+                        userStore.load({
+                            'authid':authid,
+                            'accountname':accountname,
+                            'rolecode':rolecode,
+                            'validflag':validflag,
+                            'start':0,
+                            'pageIndex':0
+                        });
+                        userStore.on('load',function(){
+                            searchFlag=true;
+                            searchDialog.close();
+                        });
+                    }
+                }
+            },{
+                text:'重置',
+                elCls : 'button button-primary',
+                handler:function(){
+                    searchForm.getField('authid').set('value','');
+                    searchForm.getField('accountname').set('value','');
+                    searchForm.getField('rolecode').set('value','');
+                    searchForm.getField('validflag').set('value','');
+                }
+            }]
+        });
+        //新建表单
+        var addFlag=true;   //防止重复提交表单
+        addForm=new Form.HForm({
+            srcNode:'#add-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    resetAddForm();
+                    addDialog.close();
+                    userStore.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+                addFlag=true;
+            }
+        }).render();
+        addDialog=new Overlay.Dialog({
+            title: '新建用户',
+            width: 450,
+            height: 275,
+            contentId: 'user-add',
+            buttons:[{
+                text:'确认提交',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(addForm.isValid() && addFlag){
+                        addFlag=false;
+                        addForm.submit();
+                    }
+                }
+            },{
+                text:'重置',
+                elCls : 'button button-primary',
+                handler : resetAddForm
+            }]
+        });
+        function resetAddForm(){
+            addForm.getField('accountname').set('value','');
+            addForm.getField('password1').set('value','');
+            addForm.getField('password2').set('value','');
+            addForm.getField('validflag').set('value','Y');
+        };
+        //编辑表单
+        var editFlag=true;   //防止重复提交表单
+        editForm=new Form.HForm({
+            srcNode:'#edit-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    editDialog.close();
+                    userStore.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+                editFlag=true;
+            }
+        }).render();
+        editDialog=new Overlay.Dialog({
+            title: '编辑用户',
+            width: 450,
+            height: 190,
+            contentId: 'user-edit',
+            buttons:[{
+                text:'确认提交',
+                elCls : 'button button-primary',
+                handler : function(){
+                    if(editForm.isValid() && editFlag){
+                        editFlag=false;
+                        editForm.submit();
+                    }
+                }
+            }]
+        });
+    });
+</script>
+</body>
+</html>
