@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
+    <title>Role Management</title>
+</head>
+<body>
+<div id="role-grid" style="margin:10px;"></div>
+<div id="role-creator" class="hide">
+    <form id="add-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/role/add" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">角色代码</label>
+                <div class="controls">
+                    <input type="text" id="a-role-code" name="role-code" class="input-small control-text" data-messages="{regexp:'Invalid Role Code'}" data-rules="{required:true,regexp:/^[A-Z]{2}$/}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">用户组名称</label>
+                <div class="controls">
+                    <input type="text" id="a-role-name" name="role-name" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select id="a-role-status" name="role-status" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span15">
+                <label class="control-label">描述</label>
+                <div class="controls control-row4">
+                    <textarea id="a-role-desc" name="role-desc" class="input-large" data-rules="{maxlength:100}"></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="role-editor" class="hide">
+    <form id="edit-form" class="form-horizontal" action="<?php echo $this->baseUrl(); ?>/core/role/edit" method="post">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">角色代码</label>
+                <div class="controls">
+                    <input type="text" id="e-role-code" class="input-small control-text" disabled="disabled"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">用户组名称</label>
+                <div class="controls">
+                    <input type="text" id="e-role-name" name="role-name" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select id="e-role-status" name="role-status" class="input-normal">
+                        <option value="Y">有效</option>
+                        <option value="N">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span15">
+                <label class="control-label">描述</label>
+                <div class="controls control-row4">
+                    <textarea id="e-role-desc" name="role-desc" class="input-large" data-rules="{maxlength:100}"></textarea>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="h-role-code" name="role-code"/>
+    </form>
+</div>
+<div id="role-privilege" class="hide">
+    <div class="row">
+        <div class="span8">
+            <input type="text" id="p1" name="p1"/>
+            <input type="hidden" id="p2" name="p2"/>
+            <div id="t1"></div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
+<script type="text/javascript">
+    var baseUrl="<?php echo $this->baseUrl(); ?>";
+</script>
+<script type="text/javascript">
+    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/tree','bui/extensions/treepicker'], function(Data,Grid,Overlay,Form,Tree,TreePicker){
+        var addForm,editForm,addDialog,editDialog,privilegeDialog,forumStore,forumTree,forumPicker,store,columns,grid;
+        addForm=new Form.HForm({
+            srcNode:'#add-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    $('#a-role-code').val('');
+                    $('#a-role-name').val('');
+                    $('#a-role-status').val('Y');
+                    $('#a-role-desc').val('');
+                    addDialog.close();
+                    store.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+            }
+        }).render();
+        addDialog=new Overlay.Dialog({
+            title:'新增用户组',
+            width:500,
+            height:250,
+            contentId:'role-creator',
+            success:function(){
+                addForm.submit();
+            }
+        });
+        editForm=new Form.HForm({
+            srcNode:'#edit-form',
+            submitType:'ajax',
+            callback:function(data){
+                if(data.success){
+                    BUI.Message.Alert(data.info,'success');
+                    editDialog.close();
+                    store.load();
+                }else{
+                    BUI.Message.Alert(data.info,'error');
+                }
+            }
+        }).render();
+        editDialog=new Overlay.Dialog({
+            title:'编辑用户组',
+            width:500,
+            height:250,
+            contentId:'role-editor',
+            success:function(){
+                editForm.submit();
+            }
+        });
+        privilegeDialog=new Overlay.Dialog({
+            title:'设置用户组权限',
+            width:350,
+            height:200,
+            contentId:'role-privilege',
+            success:function(){
+                $('#p2').val();
+            }
+        });
+
+        forumStore=new Data.TreeStore({
+            pidField: 'pid',
+            root: {
+                id: 0,
+                text: 'sidebar'
+            }
+        });
+        forumTree=new Tree.TreeList({
+            render:'#t1',
+            store:forumStore,
+            //checkType:'all',
+            showLine:true
+        });
+        forumTree.render();
+        /*forumPicker=new TreePicker({
+            trigger:'#p1',
+            valueField:'#p2',
+            selectStatus:'checked',
+            width:200,
+            children:[forumTree]
+        });
+        forumPicker.render();*/
+
+
+
+        //////////////////////////////////////////////
+
+        store=new Data.Store({
+            url:baseUrl+'/core/role/list',
+            proxy:{
+                method:'POST'
+            },
+            autoLoad:true
+        });
+        columns=[{
+            title:'角色代码',dataIndex:'rolecode',width:100,elCls:'center'
+        },{
+            title:'用户组名称',dataIndex:'rolename',width:150,elCls:'center'
+        },{
+            title:'当前状态',dataIndex:'validflag',width:100,elCls:'center',renderer:function(value,obj){
+                return obj.validflag=='Y' ? '有效' : '无效';
+            }
+        }];
+        grid=new Grid.Grid({
+            render:'#role-grid',
+            width:400,
+            columns:columns,
+            loadMask:true,
+            store:store,
+            plugins:[Grid.Plugins.RowNumber],
+            tbar:{
+                items:[{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-plus-sign"></i>新增',
+                    listeners:{
+                        click:function(){
+                            addDialog.show();
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-plus-sign"></i>编辑',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                $.post(baseUrl+'/core/role/detail',{code:selection.rolecode},function(data){
+                                 if(data){
+                                        $('#h-role-code').val(data.rolecode);
+                                        $('#e-role-code').val(data.rolecode);
+                                        $('#e-role-name').val(data.rolename);
+                                        $('#e-role-status').val(data.validflag);
+                                        $('#e-role-desc').val(data.description);
+                                        editDialog.show();
+                                    }
+                                 },'json');
+                            }else{
+                                BUI.Message.Alert('请选择用户组','warning');
+                            }
+                        }
+                    }
+                },{
+                    btnCls:'button button-small',
+                    text:'<i class="icon-user"></i>设定权限',
+                    listeners:{
+                        click:function(){
+                            var selection=grid.getSelected();
+                            if(selection){
+                                $.post(baseUrl+'/core/forum/list',{rolecode:'TA'},function(data){
+                                    if(data){
+                                        forumStore.set('data',data);
+                                        forumStore.load();
+                                    }
+                                });
+                                privilegeDialog.show();
+                            }else{
+                                BUI.Message.Alert('请选择用户组','warning');
+                            }
+                        }
+                    }
+                }]
+            },
+            autoRender:true
+        });
+    });
+</script>
+</body>
+</html>

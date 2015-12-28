@@ -2,171 +2,214 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
-    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
-    <style type="text/css">
-        #file_queue{
-            background-color: #FFF;
-            border:solid 1px #ddd;
-            height: 240px;
-            margin-bottom: 10px;
-            overflow: auto;
-            padding: 5px 10px;
-            width: 300px;
-        }
-        #upload_msg {margin-top:10px;}
-    </style>
     <title>车型库管理</title>
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/css/blueprint/grid.css" type="text/css" media="screen, projection" />
+    <style type="text/css">
+        .l-table-edit { }
+        .l-table-edit-td { padding:4px; }
+    </style>
 </head>
 <body>
-<div class="container">
-    <div id="model-grid" style="margin:10px;"></div>
+<div class="container" style="margin-top:20px;">
+    <div class="span-24 last">
+        <div id="model-grid"></div>
+    </div>
 </div>
-<div id="model-search" class="hide">
-    <form id="search-form" class="form-horizontal">
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">关键字</label>
-                <div class="controls">
-                    <input type="text" name="keywords" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">价格区间（万元）</label>
-                <div class="controls" data-rules="{numberRange : true}">
-                    <input type="number" name="l_price" class="input-small"/> -
-                    <input type="number" name="u_price" class="input-small"/>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="control-group span8">
-                <label class="control-label">当前状态</label>
-                <div class="controls">
-                    <select name="validflag" class="input-normal">
-                        <option value="">请选择</option>
-                        <option value="1">有效</option>
-                        <option value="0">无效</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </form>
+<!-- 搜索用户框 -->
+<div id="search-dialog" style="display:none;">
+    <div>
+        <table cellpadding="0" cellspacing="0" class="l-table-edit" >
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>关键字</label></td>
+                <td align="left" class="l-table-edit-td" colspan="3"><input type="text" id="sf1"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>所属厂商</label></td>
+                <td align="left" class="l-table-edit-td" colspan="3"><input type="text" id="sf2"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>指导价区间</label></td>
+                <td align="left" class="l-table-edit-td"><input type="checkbox" id="sf3-flag"/></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf3a" value="0.0"/></td>
+                <td align="left" class="l-table-edit-td"><input type="text" id="sf3b" value="0.0"/></td>
+            </tr>
+            <tr>
+                <td align="right" class="l-table-edit-td"><label>是否有效</label></td>
+                <td align="left" class="l-table-edit-td" colspan="3"><input type="text" id="sf4"/></td>
+            </tr>
+        </table>
+    </div>
 </div>
-<form>
-    <div id="file_queue"></div>
-    <input id="file_upload" name="file_upload" type="file" multiple="true">
-</form>
-<ol id="upload_msg"></ol>
 
-<!-- JS -->
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
-<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
 <script type="text/javascript">
-    var baseUrl="<?php echo $this->baseUrl(); ?>";
+    var baseUrl='<?php echo $this->baseUrl();?>';
+    var transmissions='<?php echo $this->transmissiontypeJSON;?>';
 </script>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->baseUrl(); ?>/js/mikoUI/skins/mikoui-icons.css" />
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/plugins/cookie/jquery.cookie.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/sys/client.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/mikoUI/js/mikoui.all.js"></script>
 <script type="text/javascript">
-    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
-        var grid,modelStore,columns;
-        var searchForm,searchDialog;
-        modelStore=new Data.Store({
+    $(function(){
+        var g;
+        $('#model-grid').mikoGrid({
             url:baseUrl+'/auto/model/list',
-            proxy:{
-                method:'post'
-            },
-            autoLoad:true,
-            pageSize:10
-        });
-        columns=[{
-            title:'车型代码',dataIndex:'vehicleid',width:90,elCls:'center'
-        },{
-            title:'车型名称',dataIndex:'vehiclename',width:200,elCls:'center'
-        },{
-            title:'车系名称',dataIndex:'familyname',width:100,elCls:'center'
-        },{
-            title:'备注',dataIndex:'remark',width:210,elCls:'center'
-        },{
-            title:'有效',dataIndex:'validflag',width:40,elCls:'center'
-        }];
-        grid=new Grid.Grid({
-            render:'#model-grid',
-            width:700,
-            columns:columns,
-            loadMask:true,
-            store:modelStore,
-            plugins:[Grid.Plugins.RowNumber],
-            tbar: {
-                items: [{
-                    btnCls: 'button button-small',
-                    text: '<i class="icon-search"></i>搜索',
-                    listeners: {
-                        click: function () {
-                            searchDialog.show();
-                        }
-                    }
-                }]
-            },
-            bbar:{
-                pagingBar:true
-            },
-            autoRender:true
-        });
-
-        //搜索表单
-        searchForm=new Form.HForm({
-            srcNode:'#search-form'
-        }).render();
-        var searchFlag=true;    //防止多次提交查询
-        searchDialog=new Overlay.Dialog({
-            title:'车型搜索',
-            width:400,
-            height:180,
-            contentId:'model-search',
-            buttons:[{
-                text:'搜索',
-                elCls : 'button button-primary',
-                handler : function(){
-                    /*if(searchForm.isValid() && searchFlag){
-                     searchFlag=false;
-                     var authid=searchForm.getField('authid').get('value');
-                     var accountname=searchForm.getField('accountname').get('value');
-                     var rolecode=searchForm.getField('rolecode').get('value');
-                     var validflag=searchForm.getField('validflag').get('value');
-                     userStore.load({
-                     'authid':authid,
-                     'accountname':accountname,
-                     'rolecode':rolecode,
-                     'validflag':validflag,
-                     'start':0,
-                     'pageIndex':0
-                     });
-                     userStore.on('load',function(){
-                     searchFlag=true;
-                     searchDialog.close();
-                     });
-                     }*/
+            width:830,
+            columns:[{
+                display:'车型代码',name:'mf1',width:100
+            },{
+                display:'车型名称',name:'mf2',width:200
+            },{
+                display:'车系名称',name:'mf3',width:100
+            },{
+                display:'备注信息',name:'mf4',width:150
+            },{
+                display:'所属厂商',name:'mf5',width:120
+            },{
+                display:'厂方指导价',name:'mf6',width:80,render:function(rowdata,rowindex,value){
+                    return (value*0.0001).toFixed(2)+'万元';
                 }
             },{
-                text:'重置',
-                elCls : 'button button-primary',
-                handler:function(){
-                    /*searchForm.getField('authid').set('value','');
-                     searchForm.getField('accountname').set('value','');
-                     searchForm.getField('rolecode').set('value','');
-                     searchForm.getField('validflag').set('value','');*/
-
+                display:'状态',name:'mf7',width:60,render:function(rowdata,rowindex,value){
+                    return value=='1' ? '有效' : '无效';
                 }
-            }]
+            }],
+            toolbar:{
+                items:[{
+                    text: '搜索',
+                    icon: 'search',
+                    click:function(){
+                        $.mikoDialog.open({
+                            target:$('#search-dialog'),
+                            title:'搜索车型',
+                            buttons:[{
+                                text:'搜索',
+                                cls:'l-dialog-btn-highlight',
+                                onclick:function(item,dialog){
+                                    var sv1= $.trim(miko.get('sf1').getValue());
+                                    var sv2=miko.get('sf2').getValue();
+                                    var sv3f=$('#sf3-flag').attr('checked') == undefined ? false : true;
+                                    var sv3a=miko.get('sf3a').getValue();
+                                    var sv3b=miko.get('sf3b').getValue();
+                                    var sv4=miko.get('sf4').getValue();
+                                    if(sv1!='' && sv1.length>20){
+                                        $.mikoDialog.error('关键字长度超出规定字数');
+                                        return;
+                                    }
+                                    if(sv3f && sv3a>sv3b){
+                                        $.mikoDialog.error('价格下限大于上限，请重新设置');
+                                        return;
+                                    }
+                                    g.setParm('sv1',sv1);
+                                    g.setParm('sv2',sv2);
+                                    g.setParm('sv3f',sv3f);
+                                    g.setParm('sv3a',sv3a);
+                                    g.setParm('sv3b',sv3b);
+                                    g.setParm('sv4',sv4);
+                                    g.changePage('first');
+                                    g.reload();
+                                    dialog.hide();
+                                }
+                            },{
+                                text:'取消',
+                                onclick:function(item,dialog){
+                                    dialog.hide();
+                                }
+                            }]
+                        });
+                    }
+                },{
+                    line:true
+                },{
+                    text: '导入',
+                    icon: 'add',
+                    click:function(){
+
+                    }
+                },{
+                    line:true
+                },{
+                    text: '编辑',
+                    icon: 'modify',
+                    click:function(){
+                        var selection= g.getSelected();
+                        if(selection){
+                            var id=selection.mf1;
+                            $.post(baseUrl+'/auto/model/item',{id:id},function(data){
+                                /*if(data.success){
+                                    $.mikoDialog.success(data.info);
+                                }else{
+                                    $.mikoDialog.error(data.info);
+                                }*/
+                                console.log(data);
+                            });
+                        }else{
+                            $.mikoDialog.warn('请选择车型');
+                        }
+                    }
+                },{
+                    line:true
+                },{
+                    text: '详情',
+                    icon: 'attibutes',
+                    click:function(){
+
+                    }
+                }]
+            }
+        });
+        g=$('#model-grid').mikoGetGridManager();
+        /**
+         * 搜索用户框
+         */
+        $('#sf1').mikoTextBox({
+            width:150
+        });
+        $('#sf2').mikoComboBox({
+            width:150,
+            selectBoxWidth:310,
+            selectBoxHeight:250,
+            valueField:'maker',
+            textField:'maker',
+            slide:true,
+            grid:{
+                url:baseUrl+'/auto/model/maker/list',
+                pageSize:5,
+                pageSizeOptions:[5,10,20],
+                columns:[{
+                    display:'厂商名称',name:'maker',width:270
+                }]
+            },
+            condition:{fields:[{ name:'keyword',label:'关键字',width:100}]}
+        });
+        $('#sf3a').mikoSpinner({
+            width:50,
+            isNegative:false,
+            decimalplace:1,
+            disabled:true
+        });
+        $('#sf3b').mikoSpinner({
+            width:50,
+            isNegative:false,
+            decimalplace:1,
+            disabled:true
+        });
+        $('#sf3-flag').bind('click',function(){
+            if($(this).attr('checked') != undefined){
+                miko.get('sf3a').setEnabled();
+                miko.get('sf3b').setEnabled();
+            }else{
+                miko.get('sf3a').setDisabled();
+                miko.get('sf3b').setDisabled();
+            }
+        });
+        $('#sf4').mikoComboBox({
+            width:100,
+            data:[{id:'1',text:'是'},{id:'0',text:'否'}]
         });
     });
 
 </script>
-<!-- uploadify -->
-<link rel="stylesheet" type="text/css" href="<?php echo $this->baseUrl();?>/js/plugins/uploadify/uploadify.css" />
-<script type="text/javascript" src="<?php echo $this->baseUrl();?>/js/plugins/uploadify/jquery.uploadify.min.js"></script>
-
-
 </body>
 </html>

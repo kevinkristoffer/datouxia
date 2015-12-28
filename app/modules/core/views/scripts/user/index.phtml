@@ -100,7 +100,7 @@
 <script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/mikoUI/js/mikoui.all.js"></script>
 <script type="text/javascript">
     $(function(){
-        var g,button;
+        var g;
         $('#user-grid').mikoGrid({
             url:baseUrl+'/core/user/list',
             width:580,
@@ -143,6 +143,7 @@
                                     g.setParm('sv2',sv2);
                                     g.setParm('sv3',sv3);
                                     g.setParm('sv4',sv4);
+                                    g.changePage('first');
                                     g.reload();
                                     dialog.hide();
                                 }
@@ -280,7 +281,24 @@
                     text: '密码重置',
                     icon: 'lock',
                     click:function(){
+                        var selection= g.getSelected();
+                        if(selection){
+                            $.mikoDialog.confirm('确定重置密码吗？',function(yes){
+                                if(yes){
+                                    var id=selection.authid;
+                                    $.post(baseUrl+'/core/user/modify-pass',{id:id},function(data){
+                                        if(data.success){
+                                            $.mikoDialog.success(data.info);
+                                        }else{
+                                            $.mikoDialog.error(data.info);
+                                        }
+                                    });
+                                }
+                            });
 
+                        }else{
+                            $.mikoDialog.warn('请选择用户');
+                        }
                     }
                 }]
             }

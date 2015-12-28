@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/dpl.css">
+    <link rel="stylesheet" href="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/css/bui.css">
+    <style type="text/css">
+        #file_queue{
+            background-color: #FFF;
+            border:solid 1px #ddd;
+            height: 240px;
+            margin-bottom: 10px;
+            overflow: auto;
+            padding: 5px 10px;
+            width: 300px;
+        }
+        #upload_msg {margin-top:10px;}
+    </style>
+    <title>车型库管理</title>
+</head>
+<body>
+<div class="container">
+    <div id="model-grid" style="margin:10px;"></div>
+</div>
+<div id="model-search" class="hide">
+    <form id="search-form" class="form-horizontal">
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">关键字</label>
+                <div class="controls">
+                    <input type="text" name="keywords" class="input-normal control-text" data-rules="{required:true,maxlength:20}"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">价格区间（万元）</label>
+                <div class="controls" data-rules="{numberRange : true}">
+                    <input type="number" name="l_price" class="input-small"/> -
+                    <input type="number" name="u_price" class="input-small"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span8">
+                <label class="control-label">当前状态</label>
+                <div class="controls">
+                    <select name="validflag" class="input-normal">
+                        <option value="">请选择</option>
+                        <option value="1">有效</option>
+                        <option value="0">无效</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<form>
+    <div id="file_queue"></div>
+    <input id="file_upload" name="file_upload" type="file" multiple="true">
+</form>
+<ol id="upload_msg"></ol>
+
+<!-- JS -->
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/jquery/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl(); ?>/js/bui/skin/red/seed-min.js"></script>
+<script type="text/javascript">
+    var baseUrl="<?php echo $this->baseUrl(); ?>";
+</script>
+<script type="text/javascript">
+    BUI.use(['bui/data','bui/grid','bui/overlay','bui/form','bui/select'],function(Data,Grid,Overlay,Form,Select){
+        var grid,modelStore,columns;
+        var searchForm,searchDialog;
+        modelStore=new Data.Store({
+            url:baseUrl+'/auto/model/list',
+            proxy:{
+                method:'post'
+            },
+            autoLoad:true,
+            pageSize:10
+        });
+        columns=[{
+            title:'车型代码',dataIndex:'vehicleid',width:90,elCls:'center'
+        },{
+            title:'车型名称',dataIndex:'vehiclename',width:200,elCls:'center'
+        },{
+            title:'车系名称',dataIndex:'familyname',width:100,elCls:'center'
+        },{
+            title:'备注',dataIndex:'remark',width:210,elCls:'center'
+        },{
+            title:'有效',dataIndex:'validflag',width:40,elCls:'center'
+        }];
+        grid=new Grid.Grid({
+            render:'#model-grid',
+            width:700,
+            columns:columns,
+            loadMask:true,
+            store:modelStore,
+            plugins:[Grid.Plugins.RowNumber],
+            tbar: {
+                items: [{
+                    btnCls: 'button button-small',
+                    text: '<i class="icon-search"></i>搜索',
+                    listeners: {
+                        click: function () {
+                            searchDialog.show();
+                        }
+                    }
+                }]
+            },
+            bbar:{
+                pagingBar:true
+            },
+            autoRender:true
+        });
+
+        //搜索表单
+        searchForm=new Form.HForm({
+            srcNode:'#search-form'
+        }).render();
+        var searchFlag=true;    //防止多次提交查询
+        searchDialog=new Overlay.Dialog({
+            title:'车型搜索',
+            width:400,
+            height:180,
+            contentId:'model-search',
+            buttons:[{
+                text:'搜索',
+                elCls : 'button button-primary',
+                handler : function(){
+                    /*if(searchForm.isValid() && searchFlag){
+                     searchFlag=false;
+                     var authid=searchForm.getField('authid').get('value');
+                     var accountname=searchForm.getField('accountname').get('value');
+                     var rolecode=searchForm.getField('rolecode').get('value');
+                     var validflag=searchForm.getField('validflag').get('value');
+                     userStore.load({
+                     'authid':authid,
+                     'accountname':accountname,
+                     'rolecode':rolecode,
+                     'validflag':validflag,
+                     'start':0,
+                     'pageIndex':0
+                     });
+                     userStore.on('load',function(){
+                     searchFlag=true;
+                     searchDialog.close();
+                     });
+                     }*/
+                }
+            },{
+                text:'重置',
+                elCls : 'button button-primary',
+                handler:function(){
+                    /*searchForm.getField('authid').set('value','');
+                     searchForm.getField('accountname').set('value','');
+                     searchForm.getField('rolecode').set('value','');
+                     searchForm.getField('validflag').set('value','');*/
+
+                }
+            }]
+        });
+    });
+
+</script>
+<!-- uploadify -->
+<link rel="stylesheet" type="text/css" href="<?php echo $this->baseUrl();?>/js/plugins/uploadify/uploadify.css" />
+<script type="text/javascript" src="<?php echo $this->baseUrl();?>/js/plugins/uploadify/jquery.uploadify.min.js"></script>
+
+
+</body>
+</html>

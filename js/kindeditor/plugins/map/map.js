@@ -7,7 +7,7 @@
 * @licence http://www.kindsoft.net/license.php
 *******************************************************************************/
 
-// Google Maps: http://code.google.com/apis/maps/index.phtml
+// Google Maps: http://code.google.com/apis/maps/index2.phtml
 
 KindEditor.plugin('map', function(K) {
 	var self = this, name = 'map', lang = self.lang(name + '.');

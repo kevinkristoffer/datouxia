@@ -16,8 +16,10 @@ class Puppy_Model_Auto_Model extends Puppy_Core_Model
      * @return array
      * @throws Zend_Db_Select_Exception
      */
-    public function queryModelList($where = null, $fields = array(), $limit = 10, $offset = 0)
+    public function queryModelList($where = null, $fields, $limit = 10, $offset = 0)
     {
+        if (null == $fields)
+            return null;
         $select = $this->_db->select()->from($this->_prefix . 'vehicle_model', $fields);
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
@@ -46,6 +48,25 @@ class Puppy_Model_Auto_Model extends Puppy_Core_Model
     }
 
     /**
+     * @param $fields
+     * @param null $where
+     * @return mixed|null
+     */
+    public function queryModelDetail($fields,$where=null)
+    {
+        if(null == $fields)
+            return null;
+        $select=$this->_db->select()->from($this->_prefix.'vehicle_model',$fields);
+        if ($where != null && is_array($where)) {
+            foreach ($where as $key => $value) {
+                $select = $select->where($key, $value);
+            }
+        }
+        $result=$select->query()->fetch();
+        return $result;
+    }
+
+    /**
      * @param $model
      * @return int
      * @throws Zend_Db_Adapter_Exception
@@ -68,4 +89,47 @@ class Puppy_Model_Auto_Model extends Puppy_Core_Model
         return $affectedRows;
     }
 
+    /**
+     * @param string|null $keyword
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    public function queryVehicleMaker($keyword = null, $limit = 10, $offset = 0)
+    {
+        /*
+         * 查询字段别名
+         * id:vehiclemakerid
+         * name:vehiclemaker
+         */
+        $fields['maker'] = 'vehiclemaker';
+        $select = $this->_db->select()->distinct()->from($this->_prefix . 'vehicle_model', $fields);
+        if (!empty($keyword)) {
+            $keywords = explode(' ', $keyword);
+            foreach ($keywords as $item) {
+                $select = $select->where('vehiclemaker regexp ?', trim($item));
+            }
+        }
+        $select = $select->limit($limit, $offset);
+        $result = $select->query()->fetchAll();
+        return $result;
+    }
+
+    /**
+     * @param string|null $keyword
+     * @return int
+     */
+    public function countVehicleMaker($keyword = null)
+    {
+        $fields['total'] = 'count(distinct vehiclemakerid)';
+        $select = $this->_db->select()->from($this->_prefix . 'vehicle_model', $fields);
+        if (!empty($keyword)) {
+            $keywords = explode(' ', $keyword);
+            foreach ($keywords as $item) {
+                $select = $select->where('vehiclemaker regexp ?', trim($item));
+            }
+        }
+        $result = $select->query()->fetch();
+        return $result->total;
+    }
 }

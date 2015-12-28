@@ -3,12 +3,14 @@
 class Puppy_Model_Core_Role extends Puppy_Core_Model
 {
     /**
-     * @return array
+     * @param array $fields
+     * @param array $where
+     * @return array|null
      */
-    public function queryRoleList($where = null, $fields = array('rolecode',
-        'rolename',
-        'validflag'))
+    public function queryRoleList($fields, $where = null)
     {
+        if (null == $fields)
+            return null;
         $select = $this->_db->select()->from(array('a' => $this->_prefix . 'core_role'), $fields);
         if ($where != null && is_array($where)) {
             foreach ($where as $key => $value) {
@@ -23,10 +25,12 @@ class Puppy_Model_Core_Role extends Puppy_Core_Model
      * @param string $rolecode
      * @return mixed
      */
-    public function queryRoleDetail($rolecode)
+    public function queryRoleDetail($rolecode, $fields)
     {
+        if (null == $fields)
+            return null;
         $select = $this->_db->select()
-            ->from(array('a' => $this->_prefix . 'core_role'))
+            ->from(array('a' => $this->_prefix . 'core_role'), $fields)
             ->where('rolecode=?', $rolecode);
         $result = $select->query()->fetch();
         return $result;
@@ -59,11 +63,11 @@ class Puppy_Model_Core_Role extends Puppy_Core_Model
      * @param string $rolecode
      * @return int
      */
-    public function countRoleUser($rolecode)
+    public function countRoleValidUser($rolecode)
     {
         $select = $this->_db->select()
             ->from(array('a' => $this->_prefix . 'core_user'), array('total' => 'count(*)'))
-            ->where('rolecode=?', $rolecode);
+            ->where('rolecode=?', $rolecode)->where('validstatus=?','1');
         $result = $select->query()->fetch();
         return $result->total;
     }

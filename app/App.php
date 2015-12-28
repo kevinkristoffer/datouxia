@@ -45,7 +45,7 @@ class App extends Zend_Application_Bootstrap_Bootstrap {
 		
 		$routes = Puppy_Core_Module_Loader::getInstance ()->getRoutes ();
 		$front->setRouter ( $routes );
-		// $front->getRouter()->removeDefaultRoutes(); //开发环境关闭
+		$front->getRouter()->removeDefaultRoutes(); //开发环境可关闭
 		
 		// Add route for index/index
 		$front->getRouter ()
